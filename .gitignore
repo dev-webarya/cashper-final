@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+env/
+venv/
+ENV/
+
+# Node
+node_modules/
+dist/
+build/
+npm-debug.log*
+
+# Environment Variables (CRITICAL)
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project Specific
+uploads/

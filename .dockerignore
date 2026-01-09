@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Frontend
+**/node_modules
+**/dist
+**/build
+cashper_frontend/.env
+cashper_frontend/.env.local
+
+# Backend
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/env
+**/venv
+cashper_backend/.env
+cashper_backend/.env.*
+
+# Docker
+docker-compose.yml
+Dockerfile

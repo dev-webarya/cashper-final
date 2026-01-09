@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from contextlib import asynccontextmanager
 import os
 from pathlib import Path
@@ -217,3 +217,21 @@ def health_check():
         "status": "healthy",
         "service": "cashper-backend"
     }
+
+# Serve frontend static files (only if directory exists - effectively "Production Mode")
+frontend_dist = backend_dir / "static_frontend"
+if frontend_dist.exists():
+    print(f"[INFO] Mounting frontend from {frontend_dist}")
+    
+    # Mount assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+    
+    # Serve index.html for all other routes (SPA routing)
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Allow API routes to pass through (already handled by routers above)
+        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+             return JSONResponse({"error": "Not Found"}, status_code=404)
+
+        # Serve index.html
+        return FileResponse(frontend_dist / "index.html")
