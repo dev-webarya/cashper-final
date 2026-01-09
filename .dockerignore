@@ -6,7 +6,7 @@
 **/node_modules
 **/dist
 **/build
-cashper_frontend/.env
+# cashper_frontend/.env <- Commented out to allow copying during build (User must create it on VPS)
 cashper_frontend/.env.local
 
 # Backend

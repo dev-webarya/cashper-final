@@ -171,8 +171,11 @@ if documents_path.exists():
     app.mount("/documents", StaticFiles(directory=str(documents_path)), name="documents")
 
 
-@app.get("/")
-def read_root():
+# Removed @app.get("/") to allow frontend to be served at root
+# Use /health or /api/health for health checks
+
+@app.get("/api/health-check")
+def api_root():
     """Health check endpoint"""
     return {
         "message": "Welcome to Cashper API",
