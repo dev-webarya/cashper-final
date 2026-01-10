@@ -241,5 +241,10 @@ if frontend_dist.exists():
         if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
              return JSONResponse({"error": "Not Found"}, status_code=404)
 
-        # Serve index.html
+        # Check if file exists in static_frontend (e.g. logo.png, robots.txt)
+        file_path = frontend_dist / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+
+        # Serve index.html for SPA routing
         return FileResponse(frontend_dist / "index.html")
