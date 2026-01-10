@@ -8,6 +8,11 @@ COPY cashper_frontend/package*.json ./
 RUN npm install
 
 COPY cashper_frontend/ .
+
+# Inject API URL during build to prevent double /api issue
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Stage 2: Setup Backend and Serve
