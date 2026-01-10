@@ -275,7 +275,12 @@ const Personal_loan = ({ isPopupMode = false, onPopupClose }) => {
         }));
 
         // Success: Update the EXISTING toast (prevents stacking)
-        toast.success(`${file.name} uploaded successfully!`, { id: uploadToastId });
+        toast.update(uploadToastId, {
+          render: `${file.name} uploaded successfully!`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000
+        });
         setUploadingFile(null);
 
       } catch (error) {
@@ -286,7 +291,12 @@ const Personal_loan = ({ isPopupMode = false, onPopupClose }) => {
           ? 'Upload timeout - server took too long to respond'
           : 'Failed to upload document. Please check your connection.';
 
-        toast.error(errorMessage, { id: uploadToastId });
+        toast.update(uploadToastId, {
+          render: errorMessage,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000
+        });
         setUploadingFile(null);
       }
     }
