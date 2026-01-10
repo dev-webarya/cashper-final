@@ -52,6 +52,11 @@ async def lifespan(app: FastAPI):
     try:
         connect_to_mongo()
         print("[+] Connected to MongoDB successfully!")
+        
+        # Ensure indexes exist for performance
+        from app.database.indexes import ensure_indexes
+        ensure_indexes()
+        
         print("Running inquiry status migration...")
         migrate_inquiry_status()
     except Exception as e:
