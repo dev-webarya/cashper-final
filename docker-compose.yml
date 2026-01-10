@@ -13,6 +13,8 @@ services:
       - ./cashper_backend/.env
     depends_on:
       - mongo
+    volumes:
+      - uploads_data:/app/uploads
 
   mongo:
     image: mongo:latest
@@ -25,3 +27,4 @@ services:
 
 volumes:
   mongo_data:
+  uploads_data: # Persistent storage for file uploads
