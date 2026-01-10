@@ -1,5 +1,5 @@
 // Notification API Service
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // API Endpoints
 const NOTIFICATION_ENDPOINTS = {
@@ -10,7 +10,7 @@ const NOTIFICATION_ENDPOINTS = {
   MARK_AS_READ: `${API_BASE_URL}/api/notifications/mark-read`,
   MARK_ALL_AS_READ: `${API_BASE_URL}/api/notifications/mark-all-read`,
   GET_BY_ID: (notificationId) => `${API_BASE_URL}/api/notifications/${notificationId}`,
-  
+
   // Admin endpoints
   CREATE_NOTIFICATION: `${API_BASE_URL}/api/notifications/admin/create`,
   SEND_TO_ALL_USERS: `${API_BASE_URL}/api/notifications/admin/send-all`,
@@ -369,7 +369,7 @@ export default {
   markNotificationsAsRead,
   markAllNotificationsAsRead,
   getNotificationById,
-  
+
   // Admin services
   createNotification,
   sendNotificationToAllUsers,

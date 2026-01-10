@@ -19,15 +19,15 @@ const AboutSection = () => {
               About <span className="text-green-700">Cashper</span>
             </h2>
             <p className="text-gray-600 text-sm xs:text-base sm:text-base md:text-lg lg:text-lg leading-relaxed mb-3 xs:mb-4 sm:mb-4">
-              At Cashper, we believe that everyone deserves access to transparent, reliable, and 
-              personalized financial solutions. With years of expertise in the financial services 
-              industry, we've helped thousands of individuals and businesses achieve their financial 
+              At Cashper, we believe that everyone deserves access to transparent, reliable, and
+              personalized financial solutions. With years of expertise in the financial services
+              industry, we've helped thousands of individuals and businesses achieve their financial
               goals through our innovative products and customer-first approach.
             </p>
             <p className="text-gray-600 text-sm xs:text-base sm:text-base md:text-lg lg:text-lg leading-relaxed mb-6 xs:mb-7 sm:mb-8">
-              Our commitment to trust, transparency, and innovation sets us apart. Whether you're 
-              looking for a loan, insurance, investment advice, or tax planning services, our team 
-              of experienced professionals is dedicated to guiding you every step of the way. 
+              Our commitment to trust, transparency, and innovation sets us apart. Whether you're
+              looking for a loan, insurance, investment advice, or tax planning services, our team
+              of experienced professionals is dedicated to guiding you every step of the way.
               Your financial success is our success.
             </p>
             <Link
@@ -48,7 +48,7 @@ const AboutSection = () => {
           >
             <div className="rounded-lg xs:rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
               <img
-                src="/image copy 2.png"
+                src="/about-stats.png"
                 alt="Professional business meeting"
                 className="w-full h-56 xs:h-64 sm:h-80 md:h-96 lg:h-[28rem] xl:h-[32rem] object-cover"
               />

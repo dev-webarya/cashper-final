@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 const TERM_INSURANCE_BASE = `${API_BASE_URL}/api/term-insurance`;
 
 // Create axios instance
@@ -107,14 +107,14 @@ export const submitTermInsuranceApplication = async (applicationData, documents 
   try {
     // Create FormData for multipart submission
     const formData = new FormData();
-    
+
     // Add application data fields
     Object.keys(applicationData).forEach(key => {
       if (applicationData[key] !== null && applicationData[key] !== undefined) {
         formData.append(key, applicationData[key]);
       }
     });
-    
+
     // Add document files
     if (documents.aadhar instanceof File) {
       formData.append('aadhar', documents.aadhar);

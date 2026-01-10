@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/settings';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/settings';
 
 // Get authorization headers
 const getAuthHeaders = () => {
@@ -190,7 +190,7 @@ export const logoutAllSessions = async () => {
 export const changePassword = async (passwordData) => {
   try {
     const response = await axios.post(
-      'http://127.0.0.1:8000/api/auth/change-password',
+      `${(import.meta.env.VITE_API_URL || '')}/api/auth/change-password`,
       {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
@@ -218,7 +218,7 @@ export const requestDataDownload = async (options = {}) => {
       includeTransactions: options.includeTransactions ?? true,
       includeApplications: options.includeApplications ?? true
     };
-    
+
     const response = await axios.post(
       `${API_BASE_URL}/download-data`,
       requestData,
@@ -286,29 +286,29 @@ const settingsApi = {
   // General settings
   getUserSettings,
   updateSettings,
-  
+
   // Password
   changePassword,
-  
+
   // Notifications
   updateNotificationPreferences,
-  
+
   // Theme
   updateTheme,
-  
+
   // 2FA
   setup2FA,
   enable2FA,
   disable2FA,
-  
+
   // Login history
   getLoginHistory,
   logoutSession,
   logoutAllSessions,
-  
+
   // Data download
   requestDataDownload,
-  
+
   // Account deletion
   requestAccountDeletion,
   cancelAccountDeletion,

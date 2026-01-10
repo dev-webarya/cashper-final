@@ -5,12 +5,12 @@
 
 import { apiRequest, getAuthToken } from './api';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const ADMIN_LOAN_MANAGEMENT_ENDPOINTS = {
   // Statistics
   GET_STATISTICS: `${API_BASE_URL}/api/admin/loan-management/statistics`,
-  
+
   // CRUD Operations
   GET_ALL_APPLICATIONS: `${API_BASE_URL}/api/admin/loan-management/applications`,
   GET_APPLICATION_BY_ID: (id) => `${API_BASE_URL}/api/admin/loan-management/applications/${id}`,
@@ -18,10 +18,10 @@ const ADMIN_LOAN_MANAGEMENT_ENDPOINTS = {
   UPDATE_APPLICATION: (id) => `${API_BASE_URL}/api/admin/loan-management/applications/${id}`,
   UPDATE_STATUS: (id) => `${API_BASE_URL}/api/admin/loan-management/applications/${id}/status`,
   DELETE_APPLICATION: (id) => `${API_BASE_URL}/api/admin/loan-management/applications/${id}`,
-  
+
   // Bulk Operations
   BULK_DELETE: `${API_BASE_URL}/api/admin/loan-management/applications/bulk-delete`,
-  
+
   // Export
   EXPORT_CSV: `${API_BASE_URL}/api/admin/loan-management/applications/export/csv`,
 };
@@ -56,15 +56,15 @@ export const getAllApplications = async (params = {}) => {
   try {
     const token = getAuthToken();
     const queryParams = new URLSearchParams();
-    
+
     if (params.status) queryParams.append('status', params.status);
     if (params.loanType) queryParams.append('loan_type', params.loanType);
     if (params.search) queryParams.append('search', params.search);
     queryParams.append('page', params.page || 1);
     queryParams.append('limit', params.limit || 10);
-    
+
     const url = `${ADMIN_LOAN_MANAGEMENT_ENDPOINTS.GET_ALL_APPLICATIONS}?${queryParams.toString()}`;
-    
+
     const data = await apiRequest(url, {
       method: 'GET',
       headers: {
@@ -170,11 +170,11 @@ export const updateStatus = async (applicationId, newStatus, rejectionReason = n
     const statusData = {
       status: newStatus
     };
-    
+
     if (newStatus === 'Rejected' && rejectionReason) {
       statusData.rejectionReason = rejectionReason;
     }
-    
+
     const data = await apiRequest(
       ADMIN_LOAN_MANAGEMENT_ENDPOINTS.UPDATE_STATUS(applicationId),
       {
@@ -253,12 +253,12 @@ export const exportToCSV = async (filters = {}) => {
   try {
     const token = getAuthToken();
     const queryParams = new URLSearchParams();
-    
+
     if (filters.status) queryParams.append('status', filters.status);
     if (filters.loanType) queryParams.append('loan_type', filters.loanType);
-    
+
     const url = `${ADMIN_LOAN_MANAGEMENT_ENDPOINTS.EXPORT_CSV}?${queryParams.toString()}`;
-    
+
     const data = await apiRequest(url, {
       method: 'GET',
       headers: {

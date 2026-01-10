@@ -1,12 +1,12 @@
 // Personal Loan API Service
 import { getAuthToken } from './api';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/personal-loan';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/personal-loan';
 
 // Helper function to make API requests with optional authentication
 const makeRequest = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -38,7 +38,7 @@ const makeRequest = async (url, options = {}) => {
         });
         return { success: false, error: 'Validation failed', fieldErrors };
       }
-      
+
       throw new Error(data.detail || 'Something went wrong');
     }
 
@@ -244,17 +244,17 @@ export default {
   getAllGetInTouchRequests,
   getMyGetInTouchRequests,
   updateGetInTouchStatus,
-  
+
   // EMI CALCULATOR
   calculateEMI,
-  
+
   // ELIGIBILITY CRITERIA
   getEligibilityCriteria,
   getEligibilityCriterionById,
   createEligibilityCriterion,
   updateEligibilityCriterion,
   deleteEligibilityCriterion,
-  
+
   // LOAN APPLICATIONS
   submitPersonalLoanApplication,
   getAllApplications,

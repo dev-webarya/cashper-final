@@ -5,7 +5,7 @@
 
 import { apiRequest, getAuthToken } from './api';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const LOAN_MANAGEMENT_ENDPOINTS = {
   GET_LOAN_SUMMARY: `${API_BASE_URL}/api/loan-management/summary`,

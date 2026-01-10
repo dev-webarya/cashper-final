@@ -1,6 +1,6 @@
 import { apiRequest, getAuthToken } from './api';
 
-const API_BASE_URL = 'http://localhost:8000/api/dashboard';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/dashboard';
 
 /**
  * Get all applications submitted by the current user across all categories

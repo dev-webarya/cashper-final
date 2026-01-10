@@ -1,6 +1,6 @@
 // Retail Services API
 // API Base URL Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -14,7 +14,7 @@ const getAuthHeaders = () => {
 // Helper function to handle file upload
 const createFormDataWithFiles = (data) => {
   const formData = new FormData();
-  
+
   Object.keys(data).forEach(key => {
     if (data[key] !== null && data[key] !== undefined) {
       if (data[key] instanceof File) {
@@ -28,7 +28,7 @@ const createFormDataWithFiles = (data) => {
       }
     }
   });
-  
+
   return formData;
 };
 
@@ -37,7 +37,7 @@ export const submitITRFilingApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/itr-filing`, {
       method: 'POST',
       headers: {
@@ -63,7 +63,7 @@ export const submitITRRevisionApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/itr-revision`, {
       method: 'POST',
       headers: {
@@ -89,7 +89,7 @@ export const submitITRNoticeReplyApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/itr-notice-reply`, {
       method: 'POST',
       headers: {
@@ -115,7 +115,7 @@ export const submitIndividualPANApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/individual-pan`, {
       method: 'POST',
       headers: {
@@ -141,7 +141,7 @@ export const submitHUFPANApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/huf-pan`, {
       method: 'POST',
       headers: {
@@ -167,7 +167,7 @@ export const submitPFWithdrawalApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/pf-withdrawal`, {
       method: 'POST',
       headers: {
@@ -193,7 +193,7 @@ export const submitDocumentUpdateApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/document-update`, {
       method: 'POST',
       headers: {
@@ -219,7 +219,7 @@ export const submitTradingDematApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/trading-demat`, {
       method: 'POST',
       headers: {
@@ -245,7 +245,7 @@ export const submitBankAccountApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/bank-account`, {
       method: 'POST',
       headers: {
@@ -271,7 +271,7 @@ export const submitFinancialPlanningApplication = async (applicationData) => {
   try {
     const token = localStorage.getItem('access_token');
     const formData = createFormDataWithFiles(applicationData);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/retail-services/financial-planning`, {
       method: 'POST',
       headers: {

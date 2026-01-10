@@ -1,5 +1,5 @@
 // Dashboard API Service
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -20,7 +20,7 @@ export const getDashboardStats = async () => {
     console.log('📡 API Call - getDashboardStats');
     console.log('🔑 Token exists:', !!token);
     console.log('🌐 API URL:', `${API_BASE_URL}/api/dashboard/stats`);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
       method: 'GET',
       headers: getAuthHeaders(),

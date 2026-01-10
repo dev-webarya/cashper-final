@@ -41,12 +41,12 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Testimonials Overflow Scroll */}
+        <div className="flex overflow-x-auto space-x-6 pb-8 snap-x snap-mandatory scrollbar-hide">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
+              className="min-w-[300px] md:min-w-[350px] bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 snap-start"
             >
               {/* Rating Stars */}
               <div className="flex items-center mb-4">
@@ -81,12 +81,7 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300">
-            See More Testimonials
-          </button>
-        </div>
+
       </div>
     </section>
   );

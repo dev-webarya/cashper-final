@@ -1,6 +1,6 @@
 // Personal Tax Planning API Functions
 // API Base URL Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // Personal Tax Planning API Endpoints
 export const PERSONAL_TAX_ENDPOINTS = {
@@ -8,22 +8,22 @@ export const PERSONAL_TAX_ENDPOINTS = {
   BOOK_CONSULTATION: `${API_BASE_URL}/api/personal-tax/consultation/book`,
   CALCULATE_TAX: `${API_BASE_URL}/api/personal-tax/calculator/calculate`,
   SUBMIT_APPLICATION: `${API_BASE_URL}/api/personal-tax/application/submit`,
-  
+
   // Admin endpoints
   GET_ALL_CONSULTATIONS: `${API_BASE_URL}/api/personal-tax/consultation/all`,
   GET_CONSULTATION_BY_ID: (id) => `${API_BASE_URL}/api/personal-tax/consultation/${id}`,
   UPDATE_CONSULTATION_STATUS: (id) => `${API_BASE_URL}/api/personal-tax/consultation/${id}/status`,
   DELETE_CONSULTATION: (id) => `${API_BASE_URL}/api/personal-tax/consultation/${id}`,
-  
+
   GET_ALL_CALCULATIONS: `${API_BASE_URL}/api/personal-tax/calculator/all`,
   GET_CALCULATION_BY_ID: (id) => `${API_BASE_URL}/api/personal-tax/calculator/${id}`,
-  
+
   GET_ALL_APPLICATIONS: `${API_BASE_URL}/api/personal-tax/application/all`,
   GET_APPLICATION_BY_ID: (id) => `${API_BASE_URL}/api/personal-tax/application/${id}`,
   UPDATE_APPLICATION_STATUS: (id) => `${API_BASE_URL}/api/personal-tax/application/${id}/status`,
   ASSIGN_CONSULTANT: (id) => `${API_BASE_URL}/api/personal-tax/application/${id}/assign`,
   DELETE_APPLICATION: (id) => `${API_BASE_URL}/api/personal-tax/application/${id}`,
-  
+
   GET_STATISTICS: `${API_BASE_URL}/api/personal-tax/statistics`,
 };
 
@@ -112,13 +112,13 @@ export const calculateTaxSavings = async (calculationData) => {
 export const submitTaxPlanningApplication = async (applicationData) => {
   try {
     console.log('Submitting tax planning application:', applicationData);
-    
+
     // Get authentication token
     const token = localStorage.getItem('access_token') || localStorage.getItem('token');
     const headers = {
       'Content-Type': 'application/json',
     };
-    
+
     // Add Authorization header if token exists
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -126,7 +126,7 @@ export const submitTaxPlanningApplication = async (applicationData) => {
     } else {
       console.warn('⚠️ No authentication token found');
     }
-    
+
     const response = await fetch(PERSONAL_TAX_ENDPOINTS.SUBMIT_APPLICATION, {
       method: 'POST',
       headers: headers,
@@ -138,7 +138,7 @@ export const submitTaxPlanningApplication = async (applicationData) => {
       try {
         const error = await response.json();
         console.error('Server error response:', error);
-        
+
         // Handle different error response formats
         if (error.detail) {
           errorMessage = error.detail;
@@ -180,7 +180,7 @@ const getAuthToken = () => {
  */
 const authenticatedRequest = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -231,7 +231,7 @@ export const getAllConsultations = async (params = {}) => {
     const url = queryParams
       ? `${PERSONAL_TAX_ENDPOINTS.GET_ALL_CONSULTATIONS}?${queryParams}`
       : PERSONAL_TAX_ENDPOINTS.GET_ALL_CONSULTATIONS;
-    
+
     return await authenticatedRequest(url, { method: 'GET' });
   } catch (error) {
     throw error;
@@ -306,7 +306,7 @@ export const getAllCalculations = async (params = {}) => {
     const url = queryParams
       ? `${PERSONAL_TAX_ENDPOINTS.GET_ALL_CALCULATIONS}?${queryParams}`
       : PERSONAL_TAX_ENDPOINTS.GET_ALL_CALCULATIONS;
-    
+
     return await authenticatedRequest(url, { method: 'GET' });
   } catch (error) {
     throw error;
@@ -344,7 +344,7 @@ export const getAllApplications = async (params = {}) => {
     const url = queryParams
       ? `${PERSONAL_TAX_ENDPOINTS.GET_ALL_APPLICATIONS}?${queryParams}`
       : PERSONAL_TAX_ENDPOINTS.GET_ALL_APPLICATIONS;
-    
+
     return await authenticatedRequest(url, { method: 'GET' });
   } catch (error) {
     throw error;
@@ -447,21 +447,21 @@ export default {
   bookTaxConsultation,
   calculateTaxSavings,
   submitTaxPlanningApplication,
-  
+
   // Admin functions
   getAllConsultations,
   getConsultationById,
   updateConsultationStatus,
   deleteConsultation,
-  
+
   getAllCalculations,
   getCalculationById,
-  
+
   getAllApplications,
   getApplicationById,
   updateApplicationStatus,
   assignConsultant,
   deleteApplication,
-  
+
   getPersonalTaxStatistics,
 };

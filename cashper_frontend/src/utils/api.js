@@ -1,14 +1,14 @@
 // API Base URL
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api';
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.message || 'Something went wrong');
   }
-  
+
   return data;
 };
 
@@ -16,14 +16,14 @@ const handleResponse = async (response) => {
 export const submitLoanApplication = async (loanType, formData, documents) => {
   try {
     const formDataToSend = new FormData();
-    
+
     // Append form fields
     Object.keys(formData).forEach(key => {
       if (formData[key]) {
         formDataToSend.append(key, formData[key]);
       }
     });
-    
+
     // Append document files
     if (documents) {
       Object.keys(documents).forEach(key => {
@@ -32,21 +32,21 @@ export const submitLoanApplication = async (loanType, formData, documents) => {
         }
       });
     }
-    
+
     // Map loan type to correct endpoint - All use unified loans endpoint
     const endpointMap = {
       'personal-loan': `${API_BASE_URL}/loans/apply/personal-loan`,
       'home-loan': `${API_BASE_URL}/loans/apply/home-loan`,
       'business-loan': `${API_BASE_URL}/loans/apply/business-loan`
     };
-    
+
     const endpoint = endpointMap[loanType] || `${API_BASE_URL}/loans/apply/${loanType}`;
-    
+
     const response = await fetch(endpoint, {
       method: 'POST',
       body: formDataToSend,
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error submitting loan application:', error);
@@ -64,7 +64,7 @@ export const getAllLoanApplications = async (filters = {}) => {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching loan applications:', error);
@@ -81,7 +81,7 @@ export const getLoanApplication = async (applicationId) => {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching loan application:', error);
@@ -98,7 +98,7 @@ export const getLoanApplicationByRef = async (referenceNumber) => {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching loan application:', error);
@@ -116,7 +116,7 @@ export const updateLoanStatus = async (applicationId, status, adminNotes = '') =
       },
       body: JSON.stringify({ status, adminNotes }),
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error updating loan status:', error);
@@ -133,7 +133,7 @@ export const getLoanStatistics = async () => {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching loan statistics:', error);
@@ -147,14 +147,14 @@ export const getMyLoans = async (email, phone) => {
     const params = new URLSearchParams();
     if (email) params.append('email', email);
     if (phone) params.append('phone', phone);
-    
+
     const response = await fetch(`${API_BASE_URL}/dashboard/my-loans?${params}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching user loans:', error);
@@ -171,7 +171,7 @@ export const getUserStatistics = async (userId) => {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error fetching user statistics:', error);
@@ -189,7 +189,7 @@ export const registerUser = async (userData) => {
       },
       body: JSON.stringify(userData),
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error registering user:', error);
@@ -206,7 +206,7 @@ export const loginUser = async (email, password) => {
       },
       body: JSON.stringify({ email, password }),
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error logging in:', error);
@@ -223,7 +223,7 @@ export const forgotPassword = async (email) => {
       },
       body: JSON.stringify({ email }),
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error sending password reset:', error);
@@ -237,7 +237,7 @@ export const checkHealth = async () => {
     const response = await fetch(`${API_BASE_URL}/health`, {
       method: 'GET',
     });
-    
+
     return await handleResponse(response);
   } catch (error) {
     console.error('Error checking API health:', error);

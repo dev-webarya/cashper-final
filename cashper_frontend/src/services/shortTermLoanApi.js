@@ -1,12 +1,12 @@
 // Short Term Loan API Service
 import { getAuthToken } from './api';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/short-term-loan';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/short-term-loan';
 
 // Helper function to make API requests with optional authentication
 const makeRequest = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -57,10 +57,10 @@ export const submitGetInTouch = async (formData) => {
  */
 export const getAllGetInTouchRequests = async (params = {}) => {
   const queryParams = new URLSearchParams(params).toString();
-  const url = queryParams 
+  const url = queryParams
     ? `${API_BASE_URL}/get-in-touch?${queryParams}`
     : `${API_BASE_URL}/get-in-touch`;
-  
+
   return await makeRequest(url, { method: 'GET' });
 };
 
@@ -108,10 +108,10 @@ export const submitShortTermLoanApplication = async (applicationData) => {
  */
 export const getAllApplications = async (params = {}) => {
   const queryParams = new URLSearchParams(params).toString();
-  const url = queryParams 
+  const url = queryParams
     ? `${API_BASE_URL}/applications?${queryParams}`
     : `${API_BASE_URL}/applications`;
-  
+
   return await makeRequest(url, { method: 'GET' });
 };
 
@@ -226,7 +226,7 @@ export default {
   getAllGetInTouchRequests,
   getMyGetInTouchRequests,
   updateGetInTouchStatus,
-  
+
   // LOAN APPLICATIONS
   submitShortTermLoanApplication,
   getAllApplications,
@@ -234,7 +234,7 @@ export default {
   getMyApplications,
   updateApplication,
   deleteApplication,
-  
+
   // ELIGIBILITY CRITERIA
   getEligibilityCriteria,
   getEligibilityCriterionById,

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 const MOTOR_INSURANCE_BASE = `${API_BASE_URL}/api/motor-insurance`;
 
 // Create axios instance
@@ -107,14 +107,14 @@ export const submitMotorInsuranceApplication = async (applicationData, documents
   try {
     // Create FormData for multipart submission
     const formData = new FormData();
-    
+
     // Add application data fields
     Object.keys(applicationData).forEach(key => {
       if (applicationData[key] !== null && applicationData[key] !== undefined) {
         formData.append(key, applicationData[key]);
       }
     });
-    
+
     // Add document files
     if (documents.rc instanceof File) {
       formData.append('rc', documents.rc);

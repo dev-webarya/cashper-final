@@ -17,9 +17,13 @@ const AdminDashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
-  const API_BASE_URL = 'http://127.0.0.1:8000/api/admin';
-  const WS_BASE_URL = 'ws://127.0.0.1:8000/api/admin';
-  
+  const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/admin';
+  const getWebSocketUrl = () => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    return apiUrl.replace(/^http/, 'ws') + '/api/admin';
+  };
+  const WS_BASE_URL = getWebSocketUrl();
+
   const wsRef = useRef(null);
   const connectionAttemptRef = useRef(0);
   const maxReconnectAttempts = 3;
@@ -67,11 +71,11 @@ const AdminDashboard = () => {
     try {
       setConnectionStatus('connecting');
       const wsUrl = `${WS_BASE_URL}/ws/dashboard`;
-      
+
       console.log('🔌 Connecting to WebSocket:', wsUrl);
-      
+
       const ws = new WebSocket(wsUrl);
-      
+
       ws.onopen = () => {
         console.log('✅ WebSocket connected');
         setIsConnected(true);
@@ -80,12 +84,12 @@ const AdminDashboard = () => {
         connectionAttemptRef.current = 0;
         setLoading(false);
       };
-      
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           console.log('📡 Real-time update:', data);
-          
+
           if (data.type === 'dashboard_update') {
             // Update stats
             if (data.stats) {
@@ -142,7 +146,7 @@ const AdminDashboard = () => {
               ];
               setStats(statsData);
             }
-            
+
             // Update performance metrics
             if (data.performance) {
               setPerformanceMetrics({
@@ -153,7 +157,7 @@ const AdminDashboard = () => {
                 ratingMax: data.performance.rating_max || 5
               });
             }
-            
+
             // Update activities
             if (data.activities) {
               const activitiesData = data.activities.map((activity) => ({
@@ -169,13 +173,13 @@ const AdminDashboard = () => {
               }));
               setRecentActivities(activitiesData);
             }
-            
+
             // Update timestamp
             const now = new Date();
-            setLastUpdated(now.toLocaleString('en-US', { 
-              month: 'short', 
-              day: 'numeric', 
-              hour: '2-digit', 
+            setLastUpdated(now.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
               minute: '2-digit',
               second: '2-digit'
             }));
@@ -184,22 +188,22 @@ const AdminDashboard = () => {
           console.error('Error parsing WebSocket message:', err);
         }
       };
-      
+
       ws.onerror = (error) => {
         console.error('❌ WebSocket error:', error);
         setConnectionStatus('error');
       };
-      
+
       ws.onclose = () => {
         console.log('🔌 WebSocket closed');
         setIsConnected(false);
-        
+
         // Attempt reconnect
         if (connectionAttemptRef.current < maxReconnectAttempts) {
           connectionAttemptRef.current++;
           const delay = Math.pow(2, connectionAttemptRef.current) * 1000;
           console.log(`🔄 Reconnect attempt ${connectionAttemptRef.current}/${maxReconnectAttempts} in ${delay}ms`);
-          
+
           reconnectIntervalRef.current = setTimeout(() => {
             connectWebSocket();
           }, delay);
@@ -209,7 +213,7 @@ const AdminDashboard = () => {
           startFallbackPolling();
         }
       };
-      
+
       wsRef.current = ws;
     } catch (err) {
       console.error('Failed to create WebSocket:', err);
@@ -221,12 +225,12 @@ const AdminDashboard = () => {
   const startFallbackPolling = useCallback(() => {
     console.log('📊 Starting fallback polling');
     setConnectionStatus('fallback');
-    
+
     const poll = async () => {
       try {
         const token = localStorage.getItem('access_token');
         const timestamp = Date.now();
-        
+
         const [statsRes, perfRes, activitiesRes, serviceStatsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/dashboard/stats?t=${timestamp}`, {
             headers: {
@@ -250,17 +254,17 @@ const AdminDashboard = () => {
             }
           })
         ]);
-        
+
         if (statsRes.ok && perfRes.ok && activitiesRes.ok) {
           const [statsData, perfData, activitiesData, serviceStatsData] = await Promise.all([
             statsRes.json(),
             perfRes.json(),
             activitiesRes.json(),
-            serviceStatsRes.ok ? serviceStatsRes.json() : Promise.resolve({investments: 0, taxPlanning: 0, retailServices: 0, corporateServices: 0})
+            serviceStatsRes.ok ? serviceStatsRes.json() : Promise.resolve({ investments: 0, taxPlanning: 0, retailServices: 0, corporateServices: 0 })
           ]);
-          
+
           console.log('✅ Fallback polling data received');
-          
+
           // Helper function to extract count from currency or return as is
           const extractCount = (value) => {
             if (typeof value === 'string' && value.includes('₹')) {
@@ -314,11 +318,11 @@ const AdminDashboard = () => {
             }
           ];
           setStats(statsArray);
-          
+
           // Update service stats
           setServiceStats(serviceStatsData);
           console.log('✅ Service stats fetched:', serviceStatsData);
-          
+
           // Update performance
           setPerformanceMetrics({
             totalLogins: perfData.total_logins || 0,
@@ -344,10 +348,10 @@ const AdminDashboard = () => {
           }
           // Update timestamp
           const now = new Date();
-          setLastUpdated(now.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
+          setLastUpdated(now.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
           }));
@@ -457,8 +461,8 @@ const AdminDashboard = () => {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <p className="text-red-600 font-semibold">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             Retry
@@ -682,11 +686,10 @@ const AdminDashboard = () => {
                   <button
                     key={index}
                     onClick={() => setActivitiesPage(index + 1)}
-                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${
-                      activitiesPage === index + 1
+                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${activitiesPage === index + 1
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </button>

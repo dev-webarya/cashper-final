@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/business-tax';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/business-tax';
 
 // ===================== PUBLIC ENDPOINTS =====================
 
@@ -40,13 +40,13 @@ export const calculateBusinessTaxSavings = async (calculationData) => {
 export const submitBusinessTaxPlanningApplication = async (applicationData) => {
   try {
     console.log('Submitting business tax planning application:', applicationData);
-    
+
     // Get authentication token
     const token = localStorage.getItem('access_token') || localStorage.getItem('token');
     const headers = {
       'Content-Type': 'application/json',
     };
-    
+
     // Add Authorization header if token exists
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -54,19 +54,19 @@ export const submitBusinessTaxPlanningApplication = async (applicationData) => {
     } else {
       console.warn('⚠️ No authentication token found');
     }
-    
+
     const response = await axios.post(
-      `${API_BASE_URL}/application/submit`, 
+      `${API_BASE_URL}/application/submit`,
       applicationData,
       { headers }
     );
     return response.data;
   } catch (error) {
     console.error('Business Tax API Error:', error.response?.data || error.message);
-    
+
     // Enhanced error handling
     let errorMessage = 'Failed to submit application';
-    
+
     if (error.response?.data) {
       const data = error.response.data;
       if (data.detail) {
@@ -79,7 +79,7 @@ export const submitBusinessTaxPlanningApplication = async (applicationData) => {
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     throw new Error(errorMessage);
   }
 };

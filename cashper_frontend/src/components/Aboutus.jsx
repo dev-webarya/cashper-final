@@ -43,7 +43,7 @@ import { getTestimonials, getAchievements, getStats, getMilestones } from '../se
 
 const Aboutus = () => {
   const navigate = useNavigate();
-  
+
   // Handle navigation to contact page with scroll to hero section
   const handleContactNavigation = () => {
     navigate('/contact');
@@ -54,7 +54,7 @@ const Aboutus = () => {
       });
     }, 100);
   };
-  
+
   const [isVisible, setIsVisible] = useState(false);
   const [activeSection, setActiveSection] = useState('mission');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -68,7 +68,7 @@ const Aboutus = () => {
   const [achievements, setAchievements] = useState([]);
   const [stats, setStats] = useState([]);
   const [milestones, setMilestones] = useState([]);
-  
+
   // Loading States
   const [isLoadingTestimonials, setIsLoadingTestimonials] = useState(true);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
@@ -274,7 +274,7 @@ const Aboutus = () => {
       try {
         setIsLoadingTestimonials(true);
         const response = await getTestimonials();
-        
+
         if (response && response.length > 0) {
           setTestimonials(response);
         } else {
@@ -299,7 +299,7 @@ const Aboutus = () => {
       try {
         setIsLoadingAchievements(true);
         const response = await getAchievements();
-        
+
         if (response && response.length > 0) {
           setAchievements(response);
         } else {
@@ -322,7 +322,7 @@ const Aboutus = () => {
       try {
         setIsLoadingStats(true);
         const response = await getStats();
-        
+
         if (response && response.length > 0) {
           setStats(response);
         } else {
@@ -345,7 +345,7 @@ const Aboutus = () => {
       try {
         setIsLoadingMilestones(true);
         const response = await getMilestones();
-        
+
         if (response && response.length > 0) {
           setMilestones(response);
         } else {
@@ -585,25 +585,32 @@ const Aboutus = () => {
     {
       name: "Bhanu Anand Tripathi",
       position: "Founder at CASHPER",
-      image: "/team/Bhanu Anand Tripathi .jpg",
+      image: "/team/bhanu-tripathi.jpg",
       experience: "18+ years of experience",
       education: "Graduate"
     },
     {
       name: "Madhav Mishra",
       position: " Manager at CASHPER",
-      image: "/team/madhav.jpg",
+      image: "/team/madhav-mishra.jpg",
       experience: "4+ years of experience",
       education: "MBA, CMA from ICMAI"
     },
     {
       name: "Usha",
       position: "Founder at CASHPER",
-      image: "/team/Usha.jpeg",
+      image: "/team/usha.jpg",
       experience: "13+ years of experience",
       education: "MCA",
     },
-   
+    {
+      name: "Rohit Gupta",
+      position: "Advisor",
+      image: "/team/rohit-gupta.jpg",
+      experience: "Industry Expert",
+      education: "Expert"
+    }
+
   ];
   return (
     <motion.div
@@ -615,10 +622,10 @@ const Aboutus = () => {
     >
       {/* Hero Section - Fully Responsive */}
       <section className="relative h-[320px] xs:h-[350px] sm:h-[500px] md:h-[550px] lg:h-[550px] xl:h-[600px] flex items-center justify-center overflow-hidden pt-16 xs:pt-20 md:pt-30 lg:pt-30 xl:pt-30 sm:pt-0">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: "url('/business-people-meeting (1).jpg')",
+          style={{
+            backgroundImage: "url('/business-meeting.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center center",
             backgroundAttachment: "scroll",
@@ -641,7 +648,7 @@ const Aboutus = () => {
             <p className="text-sm xs:text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed font-light px-2">
               Empowering dreams through innovative financial solutions. We're more than just a lending company – we're your partners in financial success.
             </p>
-            
+
             <div className="mt-4 xs:mt-5 sm:mt-6 md:mt-7 lg:mt-8 flex flex-wrap justify-center gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 px-2">
               <div className="flex items-center gap-1.5 xs:gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-full">
                 <CheckCircle className="w-4 h-4 xs:w-4.5 xs:h-4.5 sm:w-5 sm:h-5 text-green-400" />
@@ -695,11 +702,10 @@ const Aboutus = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSection(tab.id)}
-                  className={`flex items-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 md:px-6 py-1.5 xs:py-2 sm:py-2.5 md:py-3 rounded-lg transition-all duration-300 font-medium text-xs xs:text-sm sm:text-base whitespace-nowrap ${
-                    activeSection === tab.id
-                      ? 'bg-white text-green-600 shadow-md'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                  className={`flex items-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 md:px-6 py-1.5 xs:py-2 sm:py-2.5 md:py-3 rounded-lg transition-all duration-300 font-medium text-xs xs:text-sm sm:text-base whitespace-nowrap ${activeSection === tab.id
+                    ? 'bg-white text-green-600 shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                    }`}
                 >
                   {tab.icon}
                   <span className="hidden xs:inline">{tab.label}</span>
@@ -723,8 +729,8 @@ const Aboutus = () => {
                     <Target className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 text-green-600 mx-auto mb-4 xs:mb-5 sm:mb-6" />
                     <h2 className="text-2xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 xs:mb-5 sm:mb-6">Our Mission</h2>
                     <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed mb-6 xs:mb-7 sm:mb-8 px-2">
-                      To democratize access to financial services by providing transparent, 
-                      technology-driven lending solutions that empower individuals and businesses 
+                      To democratize access to financial services by providing transparent,
+                      technology-driven lending solutions that empower individuals and businesses
                       to achieve their financial goals with confidence and ease.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xs:gap-5 sm:gap-6">
@@ -768,8 +774,8 @@ const Aboutus = () => {
                     <Eye className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 text-emerald-600 mx-auto mb-4 xs:mb-5 sm:mb-6" />
                     <h2 className="text-2xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 xs:mb-5 sm:mb-6">Our Vision</h2>
                     <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed mb-6 xs:mb-7 sm:mb-8 px-2">
-                      To become India's most trusted and innovative financial services platform, 
-                      creating a world where everyone has access to fair, fast, and flexible 
+                      To become India's most trusted and innovative financial services platform,
+                      creating a world where everyone has access to fair, fast, and flexible
                       financial solutions that fuel their aspirations and drive economic growth.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 xs:gap-6 sm:gap-7 md:gap-8">
@@ -850,10 +856,10 @@ const Aboutus = () => {
                 <div className={`inline-flex items-center justify-center w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-gradient-to-r ${service.color} text-white mb-4 xs:mb-5 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   {service.icon}
                 </div>
-                
+
                 <h3 className="text-base xs:text-lg sm:text-xl font-bold text-gray-900 mb-2 xs:mb-2.5 sm:mb-3">{service.title}</h3>
                 <p className="text-gray-600 mb-3 xs:mb-3.5 sm:mb-4 leading-relaxed text-sm xs:text-base">{service.description}</p>
-                
+
                 <div className="space-y-1.5 xs:space-y-2 mb-4 xs:mb-5 sm:mb-6">
                   <div className="flex justify-between items-center">
                     <span className="text-xs xs:text-sm text-gray-500">Loan Amount:</span>
@@ -864,7 +870,7 @@ const Aboutus = () => {
                     <span className="font-semibold text-green-600 text-xs xs:text-sm sm:text-base">{service.rate}</span>
                   </div>
                 </div>
-                
+
                 <button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2.5 xs:py-3 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 group text-sm xs:text-base">
                   Learn More
                   <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4 group-hover:translate-x-1 transition-transform" />
@@ -919,7 +925,7 @@ const Aboutus = () => {
                 <div>
                   <h3 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 mb-1 xs:mb-2">{leader.name}</h3>
                   <p className="text-green-600 font-semibold text-sm xs:text-base mb-4 xs:mb-5">{leader.position}</p>
-                  
+
                   <div className="space-y-2 xs:space-y-2.5 text-gray-600 text-xs xs:text-sm sm:text-base border-t pt-4 xs:pt-5">
                     {leader.experience && (
                       <div className="flex items-center justify-center gap-2 xs:gap-2.5">
@@ -1108,7 +1114,7 @@ const Aboutus = () => {
                   className="flex-1 xs:flex-initial bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-4 xs:px-5 sm:px-6 md:px-8 py-3.5 xs:py-4 sm:py-4.5 md:py-5 rounded-xl sm:rounded-2xl border-2 border-white/30 hover:border-white/60 shadow-xl hover:shadow-2xl hover:from-green-400 hover:to-emerald-500 transition-all duration-300 hover:-translate-y-2 hover:scale-105 flex items-center justify-center gap-2 xs:gap-2.5 text-sm xs:text-base sm:text-lg md:text-xl cursor-pointer group active:scale-95 sm:hidden"
                 >
                   <svg className="w-4 h-4 xs:w-5 xs:h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
                   <span className="whitespace-nowrap">WhatsApp</span>
                 </a>

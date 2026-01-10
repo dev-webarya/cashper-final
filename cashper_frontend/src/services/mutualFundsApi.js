@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/mutual-funds';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/mutual-funds';
 
 // ===================== Contact/Inquiry APIs =====================
 
@@ -78,7 +78,7 @@ export const calculateInvestmentReturns = async (calculatorData) => {
     }
 
     console.log('Sending calculator payload:', payload);
-    
+
     const response = await axios.post(`${API_BASE_URL}/calculator/calculate`, payload);
     return response.data;
   } catch (error) {
@@ -96,20 +96,20 @@ export const submitMutualFundApplication = async (applicationData) => {
   try {
     // Create FormData to handle file uploads
     const formData = new FormData();
-    
+
     // Add personal information
     formData.append('name', applicationData.name);
     formData.append('email', applicationData.email);
     formData.append('phone', applicationData.phone);
     formData.append('age', parseInt(applicationData.age));
     formData.append('panNumber', applicationData.panNumber.toUpperCase());
-    
+
     // Add investment details
     formData.append('investmentType', applicationData.investmentType);
     formData.append('investmentAmount', parseFloat(applicationData.investmentAmount));
     formData.append('investmentGoal', applicationData.investmentGoal);
     formData.append('riskProfile', applicationData.riskProfile);
-    
+
     // Only append optional SIP fields if they have valid values
     if (applicationData.sipAmount && applicationData.sipAmount.toString().trim() !== '') {
       formData.append('sipAmount', parseFloat(applicationData.sipAmount));
@@ -117,13 +117,13 @@ export const submitMutualFundApplication = async (applicationData) => {
     if (applicationData.sipFrequency && applicationData.sipFrequency.toString().trim() !== '') {
       formData.append('sipFrequency', applicationData.sipFrequency);
     }
-    
+
     // Add address & KYC
     formData.append('address', applicationData.address);
     formData.append('city', applicationData.city);
     formData.append('state', applicationData.state);
     formData.append('pincode', applicationData.pincode);
-    
+
     // Add document files (if they exist as File objects)
     if (applicationData.documents?.pan instanceof File) {
       formData.append('pan_document', applicationData.documents.pan);
@@ -139,7 +139,7 @@ export const submitMutualFundApplication = async (applicationData) => {
     }
 
     const token = localStorage.getItem('access_token');
-    
+
     const response = await axios.post(`${API_BASE_URL}/application/submit`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

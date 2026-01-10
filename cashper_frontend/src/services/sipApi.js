@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthToken } from './api';
 
-const API_BASE_URL = 'http://localhost:8000/api/sip';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/sip';
 
 // ===================== Contact/Inquiry APIs =====================
 
@@ -178,20 +178,20 @@ export const submitSIPApplication = async (applicationData) => {
       phone: applicationData.phone,
       age: parseInt(applicationData.age),
       panNumber: applicationData.panNumber.toUpperCase(),
-      
+
       // SIP Details
       sipAmount: parseFloat(applicationData.sipAmount),
       sipFrequency: applicationData.sipFrequency,
       tenure: parseInt(applicationData.tenure),
       investmentGoal: applicationData.investmentGoal,
       riskProfile: applicationData.riskProfile,
-      
+
       // Address & KYC
       address: applicationData.address,
       city: applicationData.city,
       state: applicationData.state,
       pincode: applicationData.pincode,
-      
+
       // Document paths (uploaded file paths)
       panDocument: panDoc,
       aadhaarDocument: aadhaarDoc,
