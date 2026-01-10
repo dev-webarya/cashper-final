@@ -245,7 +245,11 @@ const Personal_loan = ({ isPopupMode = false, onPopupClose }) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         
-        const response = await fetch('http://localhost:8000/api/personal-loan/upload-document', {
+        // Use environment variable or fallback to relative path /api
+        const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+        const uploadUrl = `${API_BASE_URL}/api/personal-loan/upload-document`;
+
+        const response = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
           signal: controller.signal
