@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bell, Search, User, LogOut, Settings as SettingsIcon, HelpCircle, Menu, X, Edit, Lock, UserCircle } from 'lucide-react';
 import { logoutUser } from '../../services/api';
 import { getMyNotifications, getUnreadCount } from '../../services/notificationApi';
+import { getAssetUrl } from '../../config/api.config';
 
 const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
   const navigate = useNavigate();
@@ -152,9 +153,9 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center group">
-              <img 
-                src="/logo_company.png" 
-                alt=" Cashper Logo" 
+              <img
+                src="/logo_company.png"
+                alt=" Cashper Logo"
                 className="h-8 xs:h-10 sm:h-12 w-auto group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
@@ -188,8 +189,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
               {/* Search Results Dropdown */}
               {showSearchResults && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowSearchResults(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 z-40 max-h-96 overflow-y-auto">
@@ -227,7 +228,7 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
             </div>
 
             {/* Search Icon for Mobile */}
-            <button 
+            <button
               onClick={() => {
                 setShowSearchResults(!showSearchResults);
                 setSearchTerm('');
@@ -255,8 +256,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
               {/* Notifications Dropdown */}
               {showNotifications && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowNotifications(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-72 xs:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-40">
@@ -278,9 +279,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                         notifications.map((notification) => (
                           <div
                             key={notification.id}
-                            className={`p-3 xs:p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${
-                              notification.unread ? 'bg-green-50' : ''
-                            }`}
+                            className={`p-3 xs:p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${notification.unread ? 'bg-green-50' : ''
+                              }`}
                           >
                             <div className="flex items-start">
                               <div className="flex-1">
@@ -297,7 +297,7 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                       )}
                     </div>
                     <div className="p-3 text-center border-t border-gray-200">
-                      <button 
+                      <button
                         onClick={handleViewAllNotifications}
                         className="text-xs xs:text-sm text-green-700 hover:text-green-800 font-medium"
                       >
@@ -317,8 +317,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                 aria-label="User menu"
               >
                 {userData?.profileImage ? (
-                  <img 
-                    src={userData.profileImage.startsWith('http') ? userData.profileImage : `http://localhost:8000${userData.profileImage}`} 
+                  <img
+                    src={getAssetUrl(userData.profileImage)}
                     alt={userData?.name || 'User'}
                     className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-green-500"
                     onError={(e) => {
@@ -339,8 +339,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
               {/* User Dropdown */}
               {showUserMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowUserMenu(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-40">
@@ -349,7 +349,7 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                       <p className="text-xs text-gray-500">{userData?.email || 'user@example.com'}</p>
                     </div>
                     <div className="py-2">
-                      <button 
+                      <button
                         onClick={handleProfileClick}
                         className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
                       >
@@ -358,8 +358,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                         </div>
                         <span className="font-medium">My Profile</span>
                       </button>
-                      
-                      <button 
+
+                      <button
                         onClick={handleEditProfileClick}
                         className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
                       >
@@ -368,8 +368,8 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                         </div>
                         <span className="font-medium">Edit Profile</span>
                       </button>
-                      
-                      <button 
+
+                      <button
                         onClick={handleChangePasswordClick}
                         className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group"
                       >
@@ -380,7 +380,7 @@ const DashboardHeader = ({ toggleSidebar, setActiveView, userData }) => {
                       </button>
                     </div>
                     <div className="py-2 border-t border-gray-200">
-                      <button 
+                      <button
                         onClick={handleLogout}
                         className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
                       >

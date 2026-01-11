@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaFileInvoice, FaCalculator, FaUserShield, FaCheckCircle, FaClock, FaChartLine, FaHandHoldingUsd, FaLaptop, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
@@ -11,7 +12,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
   const navigate = useNavigate();
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -34,7 +35,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
     panNumber: '',
     aadhaarNumber: '',
     dateOfBirth: '',
-    
+
     // Step 2 - Income Details
     employmentType: '',
     annualIncome: '',
@@ -42,13 +43,13 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
     hasBusinessIncome: false,
     hasCapitalGains: false,
     hasHouseProperty: false,
-    
+
     // Step 3 - Address
     address: '',
     city: '',
     state: '',
     pincode: '',
-    
+
     // Step 4 - Documents
     form16: null,
     panCard: null,
@@ -64,27 +65,27 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
   // useEffect for authentication check and form restoration
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
-    
+
     // Check if returning from login with pending step
     const pendingStep = sessionStorage.getItem('itr_pending_step');
     const savedFormData = sessionStorage.getItem('itr_form_data');
-    
+
     console.log('ITR Form - Checking restoration:', { token: !!token, pendingStep, hasFormData: !!savedFormData });
-    
+
     if (token && pendingStep && savedFormData) {
       try {
         const formData = JSON.parse(savedFormData);
         const step = parseInt(pendingStep);
-        
+
         console.log('ITR Form - Restoring:', { step, formData });
-        
+
         setApplicationForm(formData);
         setCurrentStep(step);
-        
+
         // Use setTimeout to ensure state is set before showing toast
         setTimeout(() => {
           toast.success('Welcome back! Continuing your ITR application...', {
@@ -92,7 +93,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
             autoClose: 2000
           });
         }, 100);
-        
+
         // Clear session storage after restoration
         sessionStorage.removeItem('itr_pending_step');
         sessionStorage.removeItem('itr_form_data');
@@ -138,7 +139,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/file-itr', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/file-itr`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -164,8 +165,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
   // Application Form Handlers
   const validateField = (name, value) => {
     let error = '';
-    
-    switch(name) {
+
+    switch (name) {
       case 'fullName':
         if (!value || value.trim().length < 3) error = 'Full name must be at least 3 characters';
         break;
@@ -214,14 +215,14 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
       default:
         break;
     }
-    
+
     return error;
   };
 
   const handleApplicationChange = (e) => {
     const { name, value, type, checked } = e.target;
     const fieldValue = type === 'checkbox' ? checked : value;
-    
+
     setApplicationForm(prev => ({
       ...prev,
       [name]: fieldValue
@@ -241,7 +242,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
       ...prev,
       [fieldName]: true
     }));
-    
+
     const error = validateField(fieldName, applicationForm[fieldName]);
     setErrors(prev => ({
       ...prev,
@@ -252,33 +253,33 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
-    
+
     if (file) {
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Only JPG, PNG, and PDF files are allowed');
         return;
       }
-      
+
       setApplicationForm(prev => ({
         ...prev,
         [name]: file
       }));
-      
+
       toast.success(`${file.name} uploaded successfully`);
     }
   };
 
   const validateStep = (step) => {
     const stepErrors = {};
-    
+
     if (step === 1) {
       ['fullName', 'email', 'phone', 'panNumber', 'aadhaarNumber', 'dateOfBirth'].forEach(field => {
         const error = validateField(field, applicationForm[field]);
@@ -295,7 +296,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
         if (error) stepErrors[field] = error;
       });
     }
-    
+
     return stepErrors;
   };
 
@@ -311,15 +312,15 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
         autoClose: 3000
       });
       // Redirect to login with query parameters
-      navigate(`/login?redirect=/services/file-itr&step=2`, { 
-        state: { from: '/services/file-itr', returnStep: 2 } 
+      navigate(`/login?redirect=/services/file-itr&step=2`, {
+        state: { from: '/services/file-itr', returnStep: 2 }
       });
       return;
     }
-    
+
     // Then validate the current step
     const stepErrors = validateStep(currentStep);
-    
+
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       Object.keys(stepErrors).forEach(field => {
@@ -328,7 +329,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
       toast.error('Please fix all errors before proceeding');
       return;
     }
-    
+
     // Proceed to next step
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
@@ -339,30 +340,30 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Check authentication
     if (!isAuthenticated) {
       sessionStorage.setItem('itr_pending_step', '4');
       sessionStorage.setItem('itr_form_data', JSON.stringify(applicationForm));
       toast.error('Please login to submit your application');
       // Use query parameter for better redirect handling
-      navigate('/login?redirect=/services/file-itr&step=4', { 
-        state: { from: '/services/file-itr', returnStep: 4 } 
+      navigate('/login?redirect=/services/file-itr&step=4', {
+        state: { from: '/services/file-itr', returnStep: 4 }
       });
       return;
     }
-    
+
     // Validate all required documents
     const requiredDocs = ['form16', 'panCard', 'aadhaarCard', 'bankStatement'];
     const missingDocs = requiredDocs.filter(doc => !applicationForm[doc]);
-    
+
     if (missingDocs.length > 0) {
       toast.error('Please upload all required documents');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Prepare form data for API
       const formDataToSubmit = {
@@ -373,7 +374,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
         panNumber: applicationForm.panNumber,
         aadhaarNumber: applicationForm.aadhaarNumber,
         dateOfBirth: applicationForm.dateOfBirth,
-        
+
         // Income Details
         employmentType: applicationForm.employmentType,
         annualIncome: applicationForm.annualIncome,
@@ -381,13 +382,13 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
         hasBusinessIncome: applicationForm.hasBusinessIncome,
         hasCapitalGains: applicationForm.hasCapitalGains,
         hasHouseProperty: applicationForm.hasHouseProperty,
-        
+
         // Address
         address: applicationForm.address,
         city: applicationForm.city,
         state: applicationForm.state,
         pincode: applicationForm.pincode,
-        
+
         // Documents
         form16: applicationForm.form16,
         panCard: applicationForm.panCard,
@@ -395,15 +396,15 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
         bankStatement: applicationForm.bankStatement,
         investmentProofs: applicationForm.investmentProofs,
       };
-      
+
       // Submit to API
       const response = await submitITRFilingApplication(formDataToSubmit);
-      
+
       toast.success('ITR Filing Application submitted successfully!', {
         position: "top-center",
         autoClose: 3000
       });
-      
+
       // Reset form
       setApplicationForm({
         fullName: '',
@@ -431,12 +432,12 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
       setErrors({});
       setTouched({});
       setCurrentStep(1);
-      
+
       // Redirect to dashboard after 2 seconds
       setTimeout(() => {
         navigate('/dashboard/retail-services');
       }, 2000);
-      
+
     } catch (error) {
       console.error('Submission error:', error);
       toast.error(error.message || 'Failed to submit application. Please try again.');
@@ -472,7 +473,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
     <>
       {!isPopupMode && <Navbar />}
       <div className="w-full overflow-x-hidden bg-white">
-        
+
         {/* Hero Section */}
         {!isPopupMode && <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
           style={{
@@ -493,7 +494,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                   Complete Income Tax Return filing assistance with maximum refunds. Our expert CAs handle all types of income sources and ensure 100% compliance. File within 24-48 hours with complete documentation support.
                 </p>
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => {
                       const element = document.getElementById('application-form-section');
                       if (element) {
@@ -506,7 +507,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Contact Form - Right Side */}
               <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -579,9 +580,9 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                 </p>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80" 
-                  alt="ITR Filing" 
+                <img
+                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80"
+                  alt="ITR Filing"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -614,9 +615,9 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80" 
-                  alt="Tax Benefits" 
+                <img
+                  src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80"
+                  alt="Tax Benefits"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -661,7 +662,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
               ))}
             </div>
             <div className="text-center mt-6 md:mt-8">
-              <button 
+              <button
                 onClick={() => {
                   const formSection = document.getElementById('application-form-section');
                   if (formSection) {
@@ -785,19 +786,17 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                   <div className="flex items-center justify-between mb-4">
                     {[1, 2, 3, 4].map((step) => (
                       <div key={step} className="flex items-center flex-1">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
-                          currentStep === step 
-                            ? 'bg-green-600 text-white' 
-                            : currentStep > step 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-gray-200 text-gray-500'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${currentStep === step
+                            ? 'bg-green-600 text-white'
+                            : currentStep > step
+                              ? 'bg-green-500 text-white'
+                              : 'bg-gray-200 text-gray-500'
+                          }`}>
                           {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
                         </div>
                         {step < 4 && (
-                          <div className={`flex-1 h-1 mx-2 ${
-                            currentStep > step ? 'bg-green-500' : 'bg-gray-200'
-                          }`}></div>
+                          <div className={`flex-1 h-1 mx-2 ${currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                            }`}></div>
                         )}
                       </div>
                     ))}
@@ -816,7 +815,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                     <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                       Personal Information
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -829,9 +828,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.fullName}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('fullName')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.fullName ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.fullName ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter your full name"
                         />
                         {errors.fullName && (
@@ -852,9 +850,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.email}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('email')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.email ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.email ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="your.email@example.com"
                         />
                         {errors.email && (
@@ -876,9 +873,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('phone')}
                           maxLength="10"
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.phone ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.phone ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="10-digit mobile number"
                         />
                         {errors.phone && (
@@ -900,9 +896,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('panNumber')}
                           maxLength="10"
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all uppercase ${
-                            errors.panNumber ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all uppercase ${errors.panNumber ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="ABCDE1234F"
                         />
                         {errors.panNumber && (
@@ -924,9 +919,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('aadhaarNumber')}
                           maxLength="12"
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.aadhaarNumber ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.aadhaarNumber ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="12-digit Aadhaar number"
                         />
                         {errors.aadhaarNumber && (
@@ -946,9 +940,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.dateOfBirth}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('dateOfBirth')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         />
                         {errors.dateOfBirth && (
                           <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -966,7 +959,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                     <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                       Income Details
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -977,9 +970,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.employmentType}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('employmentType')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.employmentType ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.employmentType ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select employment type</option>
                           <option value="salaried">Salaried</option>
@@ -1004,9 +996,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.annualIncome}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('annualIncome')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.annualIncome ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.annualIncome ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter annual income"
                         />
                         {errors.annualIncome && (
@@ -1025,9 +1016,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.itrType}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('itrType')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.itrType ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.itrType ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select ITR type</option>
                           <option value="ITR-1">ITR-1 (Sahaj) - Salaried individuals</option>
@@ -1045,7 +1035,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
 
                     <div className="space-y-3 mt-6 bg-gray-50 p-4 rounded-lg">
                       <p className="font-semibold text-gray-700 mb-3">Additional Income Sources:</p>
-                      
+
                       <label className="flex items-center gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-all border border-gray-200">
                         <input
                           type="checkbox"
@@ -1088,7 +1078,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                     <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                       Address Information
                     </h3>
-                    
+
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <FaHome className="inline mr-2 text-green-600" />
@@ -1100,9 +1090,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('address')}
                         rows="3"
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all resize-none ${
-                          errors.address ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all resize-none ${errors.address ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="House/Flat No., Street, Area"
                       />
                       {errors.address && (
@@ -1124,9 +1113,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.city}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('city')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.city ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.city ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="City"
                         />
                         {errors.city && (
@@ -1145,9 +1133,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.state}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('state')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.state ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.state ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select state</option>
                           <option value="Delhi">Delhi</option>
@@ -1179,9 +1166,8 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('pincode')}
                           maxLength="6"
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${
-                            errors.pincode ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-200 outline-none transition-all ${errors.pincode ? 'border-red-500' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="6-digit pincode"
                         />
                         {errors.pincode && (
@@ -1203,7 +1189,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                     <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
                       <strong>Note:</strong> Please upload clear copies of all documents. Accepted formats: JPG, PNG, PDF (Max 5MB each)
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {/* Form 16 */}
                       <div className="border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-green-500 transition-all bg-gray-50 hover:bg-white">
@@ -1391,7 +1377,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
                   ) : (
                     <div></div>
                   )}
-                  
+
                   {currentStep < 4 ? (
                     <button
                       type="button"
@@ -1434,7 +1420,7 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
             <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
               Have questions? Our tax experts are here to help you with any queries.
             </p>
-            <button 
+            <button
               onClick={handleContactClick}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-10 py-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 text-lg"
             >
@@ -1449,14 +1435,14 @@ const FileITR = ({ isPopupMode = false, onPopupClose = null }) => {
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-                <button 
+                <button
                   onClick={() => setShowContactPopup(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                   <div className="bg-green-600 p-3 rounded-full">

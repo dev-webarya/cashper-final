@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCalculator, FaChartLine, FaFileInvoice, FaDatabase, FaCheckCircle, FaClock, FaUsers, FaLaptop, FaMoneyBillWave, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome, FaBuilding } from 'react-icons/fa';
@@ -25,13 +26,13 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
 
     const savedFormData = sessionStorage.getItem('accounting_bookkeeping_form_data');
     const savedStep = sessionStorage.getItem('accounting_bookkeeping_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -93,7 +94,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/accounting-bookkeeping', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/accounting-bookkeeping`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,7 +122,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
   // Application Form Validation
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value.trim()) error = 'Full name is required';
         else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
@@ -241,7 +242,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
       return;
     }
     setCurrentStep(prev => prev + 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -250,7 +251,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -259,13 +260,13 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent submission if not on step 4
     if (currentStep < 4) {
       console.log('Form submission prevented - not on step 4');
       return;
     }
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('accounting_bookkeeping_pending_step', '4');
       sessionStorage.setItem('accounting_bookkeeping_form_data', JSON.stringify(applicationForm));
@@ -286,7 +287,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
     try {
       // Call API to submit accounting & bookkeeping application
       const response = await submitAccountingBookkeeping(applicationForm);
-      
+
       if (response.success) {
         setShowSuccessModal(true);
         toast.success('Accounting & bookkeeping application submitted successfully!');
@@ -352,11 +353,10 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                 <div className="flex justify-between items-center mb-8">
                   {[1, 2, 3, 4].map((step) => (
                     <div key={step} className="flex items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                        currentStep === step ? 'bg-green-600 text-white' :
-                        currentStep > step ? 'bg-green-200 text-green-700' :
-                        'bg-gray-200 text-gray-500'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                          currentStep > step ? 'bg-green-200 text-green-700' :
+                            'bg-gray-200 text-gray-500'
+                        }`}>
                         {step}
                       </div>
                       {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -438,7 +438,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
         style={{
@@ -459,7 +459,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                 Comprehensive accounting services for businesses of all sizes. Expert bookkeeping, financial statements, and MIS reports tailored to your business needs.
               </p>
               <div className="pt-2">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -472,7 +472,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                 </button>
               </div>
             </div>
-            
+
             {/* Contact Form - Right Side */}
             <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -730,11 +730,10 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                   <div className="flex justify-between items-center mb-8">
                     {[1, 2, 3, 4].map((step) => (
                       <div key={step} className="flex items-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                          currentStep === step ? 'bg-green-600 text-white' :
-                          currentStep > step ? 'bg-green-200 text-green-700' :
-                          'bg-gray-200 text-gray-500'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                            currentStep > step ? 'bg-green-200 text-green-700' :
+                              'bg-gray-200 text-gray-500'
+                          }`}>
                           {step}
                         </div>
                         {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -746,7 +745,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 1 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaUser className="mr-2 text-green-600" /> Full Name *
@@ -757,9 +756,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.fullName}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('fullName')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter your full name"
                         />
                         {errors.fullName && (
@@ -779,9 +777,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.email}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('email')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="your.email@example.com"
                         />
                         {errors.email && (
@@ -801,9 +798,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.phone}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('phone')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="10-digit mobile number"
                         />
                         {errors.phone && (
@@ -823,9 +819,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.panNumber}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('panNumber')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                            errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="ABCDE1234F"
                           maxLength={10}
                         />
@@ -842,7 +837,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 2 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Business Details</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaBuilding className="mr-2 text-green-600" /> Business Name *
@@ -853,9 +848,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.businessName}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('businessName')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.businessName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.businessName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter business name"
                         />
                         {errors.businessName && (
@@ -874,9 +868,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.businessType}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('businessType')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.businessType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.businessType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select Business Type</option>
                           <option value="Sole Proprietorship">Sole Proprietorship</option>
@@ -902,9 +895,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.serviceRequired}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('serviceRequired')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.serviceRequired ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.serviceRequired ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select Service</option>
                           <option value="Basic Bookkeeping">Basic Bookkeeping</option>
@@ -931,9 +923,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.numberOfTransactions}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('numberOfTransactions')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.numberOfTransactions ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.numberOfTransactions ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Approximate monthly transaction count"
                         />
                         {errors.numberOfTransactions && (
@@ -949,7 +940,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 3 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Address Information</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaHome className="mr-2 text-green-600" /> Complete Address *
@@ -960,9 +951,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('address')}
                           rows={3}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter complete address"
                         />
                         {errors.address && (
@@ -983,9 +973,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                             value={applicationForm.city}
                             onChange={handleApplicationChange}
                             onBlur={() => handleBlur('city')}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                              errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                            }`}
+                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                              }`}
                             placeholder="Enter city"
                           />
                           {errors.city && (
@@ -1005,9 +994,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                             value={applicationForm.state}
                             onChange={handleApplicationChange}
                             onBlur={() => handleBlur('state')}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                              errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                            }`}
+                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                              }`}
                             placeholder="Enter state"
                           />
                           {errors.state && (
@@ -1028,9 +1016,8 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.pincode}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('pincode')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="6-digit pincode"
                           maxLength={6}
                         />
@@ -1048,7 +1035,7 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Documents</h3>
                       <p className="text-sm text-gray-600 mb-4">All documents must be in JPG, PNG, or PDF format (max 5MB each)</p>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <Upload className="mr-2 text-green-600" /> Bank Statements *
@@ -1219,14 +1206,14 @@ const AccountingBookkeeping = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

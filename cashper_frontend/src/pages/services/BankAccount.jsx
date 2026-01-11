@@ -1,6 +1,7 @@
 
 // Cleaned: Only one set of imports and one BankAccount component below
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaUniversity, FaMobileAlt, FaShieldAlt, FaGift, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome, FaCheckCircle } from 'react-icons/fa';
@@ -49,7 +50,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
   // Validation logic
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName': if (!value || value.trim().length < 3) error = 'Full name must be at least 3 characters'; break;
       case 'email': if (!value) error = 'Email is required'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format'; break;
       case 'phone': if (!value) error = 'Phone number is required'; else if (!/^[0-9]{10}$/.test(value.replace(/\D/g, ''))) error = 'Phone must be 10 digits'; break;
@@ -71,7 +72,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
       case 'panCard': case 'aadhaarCard': case 'photo': case 'signature': case 'addressProof':
         if (!value) error = 'Required document missing';
         else if (value && value.size > 5 * 1024 * 1024) error = 'File size must be ≤ 5MB';
-        else if (value && !['image/jpeg','image/png','application/pdf'].includes(value.type)) error = 'Allowed types: JPG, PNG, PDF';
+        else if (value && !['image/jpeg', 'image/png', 'application/pdf'].includes(value.type)) error = 'Allowed types: JPG, PNG, PDF';
         break;
       default: break;
     }
@@ -96,10 +97,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
   };
   const validateStep = (step) => {
     const stepFields = [
-      step === 1 ? ['fullName','email','phone','panNumber','aadhaarNumber','dateOfBirth'] :
-      step === 2 ? ['accountType','bankPreference','accountVariant','monthlyIncome','occupationType','nomineeRequired','nomineeName','nomineeRelation'] :
-      step === 3 ? ['address','city','state','pincode','residenceType'] :
-      ['panCard','aadhaarCard','photo','signature','addressProof']
+      step === 1 ? ['fullName', 'email', 'phone', 'panNumber', 'aadhaarNumber', 'dateOfBirth'] :
+        step === 2 ? ['accountType', 'bankPreference', 'accountVariant', 'monthlyIncome', 'occupationType', 'nomineeRequired', 'nomineeName', 'nomineeRelation'] :
+          step === 3 ? ['address', 'city', 'state', 'pincode', 'residenceType'] :
+            ['panCard', 'aadhaarCard', 'photo', 'signature', 'addressProof']
     ][0];
     let stepErrors = {};
     stepFields.forEach((field) => {
@@ -117,8 +118,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
         position: 'top-center',
         autoClose: 3000
       });
-      navigate(`/login?redirect=/services/bank-account&step=2`, { 
-        state: { from: '/services/bank-account', returnStep: 2 } 
+      navigate(`/login?redirect=/services/bank-account&step=2`, {
+        state: { from: '/services/bank-account', returnStep: 2 }
       });
       return;
     }
@@ -136,12 +137,12 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
       sessionStorage.setItem('bank_account_pending_step', '4');
       sessionStorage.setItem('bank_account_form_data', JSON.stringify(applicationForm));
       toast.error('Please login to submit your application');
-      navigate('/login?redirect=/services/bank-account&step=4', { 
-        state: { from: '/services/bank-account', returnStep: 4 } 
+      navigate('/login?redirect=/services/bank-account&step=4', {
+        state: { from: '/services/bank-account', returnStep: 4 }
       });
       return;
     }
-    const allErrors = [1,2,3,4].map(validateStep).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    const allErrors = [1, 2, 3, 4].map(validateStep).reduce((acc, curr) => ({ ...acc, ...curr }), {});
     if (Object.keys(allErrors).length > 0) {
       toast.error('Please fix all errors before submitting');
       return;
@@ -185,7 +186,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
     e.preventDefault();
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/bank-account', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/bank-account`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -211,7 +212,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {!isPopupMode && <Navbar />}
-      
+
       {/* Hero Section */}
       {!isPopupMode && (<section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
         style={{
@@ -246,7 +247,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                 </div>
               </div>
               <div className="pt-2">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('apply-form');
                     if (element) {
@@ -259,7 +260,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                 </button>
               </div>
             </div>
-            
+
             {/* Contact Form - Right Side */}
             <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -381,11 +382,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
             <div className="flex justify-between items-center relative">
               {[1, 2, 3, 4].map((step) => (
                 <div key={step} className="flex-1 flex flex-col items-center relative z-10">
-                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${
-                    currentStep >= step
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${currentStep >= step
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-200 text-gray-500'
-                  }`}>
+                    }`}>
                     {step}
                   </div>
                   <div className="text-xs sm:text-sm mt-1 sm:mt-2 text-center font-medium text-gray-700">
@@ -397,7 +397,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                 </div>
               ))}
               <div className="absolute top-4 sm:top-5 left-0 right-0 h-1 bg-gray-200 -z-0">
-                <div 
+                <div
                   className="h-full bg-green-600 transition-all duration-300"
                   style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
                 />
@@ -407,7 +407,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
 
           {/* Application Form */}
           <form onSubmit={handleApplicationSubmit} className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8">
-            
+
             {/* Step 1: Personal Information */}
             {currentStep === 1 && (
               <div className="space-y-4 sm:space-y-5">
@@ -428,11 +428,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.fullName}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('fullName')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.fullName 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.fullName
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -456,11 +455,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.email}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('email')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.email 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.email
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="your@email.com"
                     />
                   </div>
@@ -484,11 +482,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.phone}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('phone')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.phone 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.phone
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="10-digit mobile number"
                     />
                   </div>
@@ -512,11 +509,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.panNumber}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('panNumber')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base uppercase transition-all duration-200 ${
-                        errors.panNumber 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base uppercase transition-all duration-200 ${errors.panNumber
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="ABCDE1234F"
                       maxLength="10"
                     />
@@ -541,11 +537,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.aadhaarNumber}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('aadhaarNumber')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.aadhaarNumber 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.aadhaarNumber
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="12-digit Aadhaar number"
                       maxLength="12"
                     />
@@ -568,11 +563,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.dateOfBirth}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('dateOfBirth')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.dateOfBirth 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.dateOfBirth
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   />
                   {errors.dateOfBirth && (
                     <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
@@ -600,11 +594,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.accountType}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('accountType')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.accountType 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.accountType
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Account Type</option>
                     <option value="savings">Savings Account</option>
@@ -628,11 +621,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.bankPreference}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('bankPreference')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.bankPreference 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.bankPreference
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Bank</option>
                     <option value="hdfc">HDFC Bank</option>
@@ -658,11 +650,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.accountVariant}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('accountVariant')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.accountVariant 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.accountVariant
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Variant</option>
                     <option value="regular">Regular Savings</option>
@@ -687,11 +678,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.monthlyIncome}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('monthlyIncome')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.monthlyIncome 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.monthlyIncome
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Income Range</option>
                     <option value="below-25k">Below ₹25,000</option>
@@ -717,11 +707,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.occupationType}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('occupationType')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.occupationType 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.occupationType
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Occupation</option>
                     <option value="salaried">Salaried</option>
@@ -767,11 +756,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.nomineeName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('nomineeName')}
-                        className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                          errors.nomineeName 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.nomineeName
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-500'
-                        } focus:outline-none`}
+                          } focus:outline-none`}
                         placeholder="Enter nominee name"
                       />
                       {errors.nomineeName && (
@@ -790,11 +778,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.nomineeRelation}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('nomineeRelation')}
-                        className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                          errors.nomineeRelation 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.nomineeRelation
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-500'
-                        } focus:outline-none`}
+                          } focus:outline-none`}
                       >
                         <option value="">Select Relation</option>
                         <option value="spouse">Spouse</option>
@@ -834,11 +821,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('address')}
                       rows="3"
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.address 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.address
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="Enter your complete address"
                     />
                   </div>
@@ -862,11 +848,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.city}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('city')}
-                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                        errors.city 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.city
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-500'
-                      } focus:outline-none`}
+                        } focus:outline-none`}
                       placeholder="Enter your city"
                     />
                   </div>
@@ -887,11 +872,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.state}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('state')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.state 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.state
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select State</option>
                     <option value="Maharashtra">Maharashtra</option>
@@ -921,11 +905,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.pincode}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('pincode')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.pincode 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.pincode
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                     placeholder="6-digit pincode"
                     maxLength="6"
                   />
@@ -946,11 +929,10 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                     value={applicationForm.residenceType}
                     onChange={handleApplicationChange}
                     onBlur={() => handleBlur('residenceType')}
-                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${
-                      errors.residenceType 
-                        ? 'border-red-500 focus:border-red-600' 
+                    className={`w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg text-sm sm:text-base transition-all duration-200 ${errors.residenceType
+                        ? 'border-red-500 focus:border-red-600'
                         : 'border-gray-200 focus:border-green-500'
-                    } focus:outline-none`}
+                      } focus:outline-none`}
                   >
                     <option value="">Select Residence Type</option>
                     <option value="owned">Owned</option>
@@ -982,9 +964,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     PAN Card <span className="text-red-500">*</span>
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${
-                    errors.panCard ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
-                  }`}>
+                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${errors.panCard ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
+                    }`}>
                     <input
                       type="file"
                       name="panCard"
@@ -1012,9 +993,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Aadhaar Card <span className="text-red-500">*</span>
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${
-                    errors.aadhaarCard ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
-                  }`}>
+                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${errors.aadhaarCard ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
+                    }`}>
                     <input
                       type="file"
                       name="aadhaarCard"
@@ -1042,9 +1022,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Passport Size Photo <span className="text-red-500">*</span>
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${
-                    errors.photo ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
-                  }`}>
+                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${errors.photo ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
+                    }`}>
                     <input
                       type="file"
                       name="photo"
@@ -1072,9 +1051,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Signature <span className="text-red-500">*</span>
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${
-                    errors.signature ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
-                  }`}>
+                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${errors.signature ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
+                    }`}>
                     <input
                       type="file"
                       name="signature"
@@ -1102,9 +1080,8 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Address Proof <span className="text-red-500">*</span>
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${
-                    errors.addressProof ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
-                  }`}>
+                  <div className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-all duration-200 ${errors.addressProof ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-green-500'
+                    }`}>
                     <input
                       type="file"
                       name="addressProof"
@@ -1140,7 +1117,7 @@ const BankAccount = ({ isPopupMode = false, onPopupClose = null }) => {
                   Previous
                 </button>
               )}
-              
+
               {currentStep < 4 ? (
                 <button
                   type="button"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaCalculator, FaUsers, FaFileAlt, FaChartLine, FaShieldAlt } from 'react-icons/fa';
@@ -51,7 +52,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
 
     const savedFormData = sessionStorage.getItem('payroll_services_form_data');
     const savedStep = sessionStorage.getItem('payroll_services_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -108,7 +109,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/payroll-services', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/payroll-services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +152,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
   };
 
   const validateStep = (step) => {
-    switch(step) {
+    switch (step) {
       case 1:
         if (!formData.name || !formData.name.trim()) {
           toast.error('⚠️ Full name is required');
@@ -235,7 +236,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
       }
       setCompletedSteps(newCompleted);
       setCurrentStep(currentStep + 1);
-      
+
       const formSection = document.getElementById('application-form-section');
       if (formSection) {
         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -245,7 +246,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const handlePreviousStep = () => {
     setCurrentStep(currentStep - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -254,13 +255,13 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent submission if not on step 4
     if (currentStep < 4) {
       console.log('Form submission prevented - not on step 4');
       return;
     }
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('payroll_services_pending_step', '4');
       sessionStorage.setItem('payroll_services_form_data', JSON.stringify(formData));
@@ -278,7 +279,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
       // Call API to submit payroll services application
       const submissionData = { ...formData, ...documents };
       const response = await submitPayrollServices(submissionData);
-      
+
       if (response.success) {
         const appNumber = 'PAY' + Date.now();
         if (isPopupMode) {
@@ -576,7 +577,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                       <p className="text-sm text-gray-600 mb-4">Please upload the following documents (JPG, PNG, PDF - Max 5MB each)</p>
 
                       <div className="space-y-4">
-                        {[{name: 'employeeData', label: 'Employee Data'}, {name: 'companyDocuments', label: 'Company Documents'}, {name: 'registrationProofs', label: 'Registration Proofs'}].map(doc => (
+                        {[{ name: 'employeeData', label: 'Employee Data' }, { name: 'companyDocuments', label: 'Company Documents' }, { name: 'registrationProofs', label: 'Registration Proofs' }].map(doc => (
                           <div key={doc.name}>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                               {doc.label}
@@ -635,7 +636,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
       {/* Hero Section with Contact Form */}
       <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-16 sm:pb-20 md:pb-24 overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 z-0"
           style={{
             backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3")',
@@ -672,7 +673,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                 </div>
               </div>
               <div className="pt-4">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -691,7 +692,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
               <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur-sm">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Get Started Today</h3>
                 <p className="text-gray-600 mb-6 text-sm sm:text-base">Fill in your details and we'll get back to you</p>
-                
+
                 <form onSubmit={handleHeroFormSubmit} className="space-y-2 sm:space-y-3">
                   <input
                     type="text"
@@ -854,7 +855,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                 description: 'Reduce overhead costs of maintaining in-house payroll team and software infrastructure.'
               }
             ].map((item, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transform hover:scale-105 transition-all"
               >
@@ -945,7 +946,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                 ]
               }
             ].map((service, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all border-t-4 border-green-600"
               >
@@ -1075,18 +1076,16 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                   {[1, 2, 3, 4].map((step) => (
                     <div key={step} className="flex items-center flex-1">
                       <div className="flex flex-col items-center flex-1">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
-                          currentStep === step 
-                            ? 'bg-green-600 text-white scale-110 shadow-lg' 
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${currentStep === step
+                            ? 'bg-green-600 text-white scale-110 shadow-lg'
                             : completedSteps.includes(step)
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-200 text-gray-500'
-                        }`}>
+                              ? 'bg-green-600 text-white'
+                              : 'bg-gray-200 text-gray-500'
+                          }`}>
                           {completedSteps.includes(step) ? <CheckCircle className="w-6 h-6" /> : step}
                         </div>
-                        <span className={`text-xs sm:text-sm mt-2 font-medium ${
-                          currentStep === step ? 'text-green-600' : 'text-gray-500'
-                        }`}>
+                        <span className={`text-xs sm:text-sm mt-2 font-medium ${currentStep === step ? 'text-green-600' : 'text-gray-500'
+                          }`}>
                           {step === 1 && 'Personal'}
                           {step === 2 && 'Company'}
                           {step === 3 && 'Address'}
@@ -1094,9 +1093,8 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                         </span>
                       </div>
                       {step < 4 && (
-                        <div className={`h-1 flex-1 transition-all duration-300 ${
-                          completedSteps.includes(step) ? 'bg-green-600' : 'bg-gray-200'
-                        }`} />
+                        <div className={`h-1 flex-1 transition-all duration-300 ${completedSteps.includes(step) ? 'bg-green-600' : 'bg-gray-200'
+                          }`} />
                       )}
                     </div>
                   ))}
@@ -1472,7 +1470,7 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
                         Previous
                       </button>
                     )}
-                    
+
                     {currentStep < 4 ? (
                       <button
                         type="button"
@@ -1560,14 +1558,14 @@ const PayrollServices = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

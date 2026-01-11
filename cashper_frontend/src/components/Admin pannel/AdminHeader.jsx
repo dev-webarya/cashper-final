@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bell, Search, User, LogOut, Settings as SettingsIcon, Menu } from 'lucide-react';
+import { getAssetUrl } from '../../config/api.config';
 
 const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
   const navigate = useNavigate();
@@ -60,10 +61,10 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
     localStorage.removeItem('adminProfile');
-    
+
     // Close the menu
     setShowUserMenu(false);
-    
+
     // Redirect to login
     navigate('/login', { replace: true });
   };
@@ -85,9 +86,9 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center group">
-              <img 
-                src="/logo_company.png" 
-                alt=" Cashper Logo" 
+              <img
+                src="/logo_company.png"
+                alt=" Cashper Logo"
                 className="h-7 xs:h-8 sm:h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
@@ -120,8 +121,8 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
               {/* Search Results Dropdown */}
               {showSearchResults && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowSearchResults(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 z-40 max-h-96 overflow-y-auto">
@@ -159,7 +160,7 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
             </div>
 
             {/* Search Icon for Mobile */}
-            <button 
+            <button
               onClick={() => {
                 setShowSearchResults(!showSearchResults);
                 setSearchTerm('');
@@ -185,8 +186,8 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
               {/* Notifications Dropdown */}
               {showNotifications && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowNotifications(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] xs:w-80 sm:w-96 max-w-md bg-white rounded-xl shadow-2xl border border-gray-200 z-40">
@@ -200,9 +201,8 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                       {notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className={`px-3 xs:px-4 py-2.5 xs:py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100 ${
-                            notification.unread ? 'bg-green-50' : ''
-                          }`}
+                          className={`px-3 xs:px-4 py-2.5 xs:py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100 ${notification.unread ? 'bg-green-50' : ''
+                            }`}
                         >
                           <div className="flex items-start space-x-2 xs:space-x-3">
                             <div className={`w-1.5 h-1.5 xs:w-2 xs:h-2 rounded-full mt-1.5 xs:mt-2 flex-shrink-0 ${notification.unread ? 'bg-green-600' : 'bg-gray-300'}`} />
@@ -215,7 +215,7 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                       ))}
                     </div>
                     <div className="px-3 xs:px-4 py-2 xs:py-3 bg-gray-50 text-center border-t rounded-b-xl">
-                      <button 
+                      <button
                         onClick={() => {
                           setActiveView('notifications');
                           setShowNotifications(false);
@@ -238,8 +238,8 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                 aria-label="User menu"
               >
                 {adminProfile?.profileImage ? (
-                  <img 
-                    src={adminProfile.profileImage.startsWith('http') ? adminProfile.profileImage : `http://localhost:8000${adminProfile.profileImage}`}
+                  <img
+                    src={getAssetUrl(adminProfile.profileImage)}
                     alt="Admin Profile"
                     className="w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover shadow-lg border-2 border-green-600"
                     onError={(e) => {
@@ -249,7 +249,7 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                     }}
                   />
                 ) : null}
-                <div 
+                <div
                   className="w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center text-white font-semibold text-xs xs:text-sm sm:text-base shadow-lg"
                   style={{ display: adminProfile?.profileImage ? 'none' : 'flex' }}
                 >
@@ -263,8 +263,8 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
               {/* User Dropdown */}
               {showUserMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-30" 
+                  <div
+                    className="fixed inset-0 z-30"
                     onClick={() => setShowUserMenu(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-52 xs:w-56 bg-white rounded-xl shadow-2xl border border-gray-200 z-40">
@@ -273,13 +273,13 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                       <p className="text-[10px] xs:text-xs text-green-100 truncate">{adminProfile?.email || 'sudha@gmail.com'}</p>
                     </div>
                     <div className="py-1.5 xs:py-2">
-                      <button 
+                      <button
                         onClick={() => handleMenuClick('profile')}
                         className="w-full flex items-center space-x-2 px-3 xs:px-4 py-1.5 xs:py-2 text-xs xs:text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors active:bg-green-100"
                       >
                         <span>My Profile</span>
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleMenuClick('settings')}
                         className="w-full flex items-center space-x-2 px-3 xs:px-4 py-1.5 xs:py-2 text-xs xs:text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors active:bg-green-100"
                       >
@@ -287,7 +287,7 @@ const AdminHeader = ({ toggleSidebar, setActiveView, adminProfile }) => {
                       </button>
                     </div>
                     <div className="py-1.5 xs:py-2 border-t border-gray-200">
-                      <button 
+                      <button
                         onClick={handleLogout}
                         className="w-full flex items-center space-x-2 px-3 xs:px-4 py-1.5 xs:py-2 text-xs xs:text-sm text-red-600 hover:bg-red-50 transition-colors active:bg-red-100"
                       >

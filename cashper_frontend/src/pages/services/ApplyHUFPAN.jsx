@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
@@ -71,7 +72,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
 
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'kartaName': case 'hufName': if (!value || value.trim().length < 3) error = 'Must be at least 3 characters'; break;
       case 'email': if (!value) error = 'Email is required'; else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format'; break;
       case 'phone': if (!value) error = 'Phone number is required'; else if (!/^[0-9]{10}$/.test(value.replace(/\D/g, ''))) error = 'Phone must be 10 digits'; break;
@@ -164,7 +165,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/apply-huf-pan', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/apply-huf-pan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -191,7 +192,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
     <>
       {!isPopupMode && <Navbar />}
       <div className="w-full overflow-x-hidden bg-white">
-        
+
         {/* Hero Section */}
         {!isPopupMode && <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
           style={{
@@ -212,7 +213,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
                   Hindu Undivided Family (HUF) is a separate legal entity for tax purposes. Get your HUF PAN card and enjoy tax benefits through income splitting, separate tax exemptions, and optimized wealth planning.
                 </p>
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => {
                       const element = document.getElementById('application-form-section');
                       if (element) {
@@ -225,7 +226,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Contact Form - Right Side */}
               <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -298,9 +299,9 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
                 </p>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" 
-                  alt="HUF PAN" 
+                <img
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                  alt="HUF PAN"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -370,9 +371,9 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
                 </ul>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80" 
-                  alt="HUF Support" 
+                <img
+                  src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80"
+                  alt="HUF Support"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -561,7 +562,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
                     <div className="space-y-5">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Document Uploads</h3>
                       <p className="text-sm text-gray-600 mb-4">Upload required documents (Max 5MB each, JPG/PNG/PDF only)</p>
-                      {[{name: 'kartaAadhaar', label: 'Karta Aadhaar Card *', required: true},{name: 'kartaPhoto', label: 'Karta Photograph *', required: true},{name: 'familyList', label: 'Family Members List *', required: true},{name: 'hufDeed', label: 'HUF Deed/Declaration *', required: true},{name: 'addressProof', label: 'Address Proof *', required: true}].map(doc => (
+                      {[{ name: 'kartaAadhaar', label: 'Karta Aadhaar Card *', required: true }, { name: 'kartaPhoto', label: 'Karta Photograph *', required: true }, { name: 'familyList', label: 'Family Members List *', required: true }, { name: 'hufDeed', label: 'HUF Deed/Declaration *', required: true }, { name: 'addressProof', label: 'Address Proof *', required: true }].map(doc => (
                         <div key={doc.name}><label className="block text-sm font-medium text-gray-700 mb-2">{doc.label}</label><div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-green-500 transition-colors"><input type="file" name={doc.name} onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" className="hidden" id={doc.name} /><label htmlFor={doc.name} className="cursor-pointer flex flex-col items-center"><Upload className="w-8 h-8 text-gray-400 mb-2" /><span className="text-sm text-gray-600">{applicationForm[doc.name] ? applicationForm[doc.name].name : 'Click to upload or drag and drop'}</span><span className="text-xs text-gray-500 mt-1">JPG, PNG or PDF (max 5MB)</span></label></div></div>
                       ))}
                     </div>
@@ -594,7 +595,7 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
             <p className="text-lg sm:text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
               Start your HUF journey today and unlock tax benefits for your family. Get expert assistance now!
             </p>
-            <button 
+            <button
               onClick={handleContactClick}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-10 py-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 text-lg"
             >
@@ -611,14 +612,14 @@ const ApplyHUFPAN = ({ isPopupMode = false, onPopupClose = null }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

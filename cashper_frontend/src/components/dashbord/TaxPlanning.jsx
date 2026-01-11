@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FileText, Calculator, PiggyBank, Briefcase, TrendingDown, 
+import {
+  FileText, Calculator, PiggyBank, Briefcase, TrendingDown,
   CheckCircle, AlertCircle, Info, Download, Plus, X, Target,
   Search, Eye
 } from 'lucide-react';
 import HomeServiceFormPopup from './HomeServiceFormPopup';
 import Personal_tax_planning from '../Personal_tax_planning';
 import Business_Tax_planning from '../Business_Tax_planning';
+import { API_BASE_URL } from '../../config/api.config';
 
 const TaxPlanning = () => {
   const [selectedSection, setSelectedSection] = useState('overview');
@@ -36,25 +37,25 @@ const TaxPlanning = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('access_token');
-        
+
         if (!token) {
           console.error('❌ No authentication token found');
           setLoading(false);
           setTaxPlans([]);
           return;
         }
-        
+
         console.log('🔑 Token from localStorage: Found');
         console.log('📡 Fetching Tax Planning applications...');
-        
+
         const [personalRes, businessRes] = await Promise.all([
-          fetch('http://localhost:8000/api/personal-tax/application/all', {
+          fetch(`${API_BASE_URL}/api/personal-tax/application/all`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch('http://localhost:8000/api/business-tax/application/all', {
+          fetch(`${API_BASE_URL}/api/business-tax/application/all`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -152,20 +153,20 @@ const TaxPlanning = () => {
   // Filter and pagination
   const filteredPlans = taxPlans.filter(plan => {
     // Search filter
-    const matchesSearch = 
+    const matchesSearch =
       plan.applicant.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plan.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plan.planType.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Status filter
     const statusMatch = statusFilter === 'all' || plan.status?.toLowerCase() === statusFilter.toLowerCase();
-    
+
     // Service type filter
     let serviceMatch = true;
     if (serviceFilter === 'all') serviceMatch = true;
     else if (serviceFilter === 'personal') serviceMatch = plan.type === 'personal';
     else if (serviceFilter === 'business') serviceMatch = plan.type === 'business';
-    
+
     return matchesSearch && statusMatch && serviceMatch;
   });
 
@@ -200,13 +201,13 @@ const TaxPlanning = () => {
   const downloadDocument = async (documentPath) => {
     try {
       console.log('📥 Original document path:', documentPath);
-      
+
       // Extract filename from path
       const fileName = documentPath.split('/').pop().split('\\').pop();
-      
+
       // Normalize the path
       let normalizedPath = documentPath;
-      
+
       // Check if it's an absolute Windows path
       if (documentPath.includes(':\\')) {
         // Extract only the relative path after 'uploads'
@@ -215,24 +216,24 @@ const TaxPlanning = () => {
           normalizedPath = documentPath.substring(uploadsIndex);
         }
       }
-      
+
       // Convert backslashes to forward slashes for URL
       normalizedPath = normalizedPath.replace(/\\/g, '/');
-      
+
       // Construct download URL
-      const downloadUrl = `http://localhost:8000/${normalizedPath}`;
-      
+      const downloadUrl = `${API_BASE_URL}/${normalizedPath}`;
+
       console.log('📥 Normalized path:', normalizedPath);
       console.log('📥 Download URL:', downloadUrl);
       console.log('📥 File name:', fileName);
-      
+
       const token = localStorage.getItem('access_token');
       const response = await fetch(downloadUrl, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      
+
       console.log('📥 Response status:', response.status);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Download failed:', errorText);
@@ -248,7 +249,7 @@ const TaxPlanning = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       console.log('✅ Download successful:', fileName);
     } catch (error) {
       console.error('❌ Error downloading document:', error);
@@ -277,19 +278,19 @@ const TaxPlanning = () => {
     if (!deduction) return null;
 
     const DeductionIcon = deduction.icon;
-    const utilizationPercentage = deduction.maxLimit === 'No Limit' 
-      ? 100 
+    const utilizationPercentage = deduction.maxLimit === 'No Limit'
+      ? 100
       : ((deduction.utilized / deduction.maxLimit) * 100).toFixed(1);
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-        <div 
+        <div
           className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className={`bg-gradient-to-r ${deduction.color} p-4 text-white relative`}>
-            <button 
+            <button
               onClick={onClose}
               className="absolute top-3 right-3 p-1.5 hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
             >
@@ -344,7 +345,7 @@ const TaxPlanning = () => {
                   <span className="font-bold text-green-600">{utilizationPercentage}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
+                  <div
                     className={`h-3 rounded-full bg-gradient-to-r ${deduction.color} transition-all`}
                     style={{ width: `${utilizationPercentage}%` }}
                   ></div>
@@ -378,14 +379,14 @@ const TaxPlanning = () => {
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-3 pt-3">
-              <button 
+              <button
                 onClick={() => handleDownloadDeductionDetails(deduction)}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
               >
                 <Download className="w-4 h-4" />
                 Download Statement
               </button>
-              <button 
+              <button
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-semibold"
               >
                 <FileText className="w-4 h-4" />
@@ -405,7 +406,7 @@ const TaxPlanning = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowServiceTypeModal(false)}>
-        <div 
+        <div
           className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden relative"
           onClick={(e) => e.stopPropagation()}
         >
@@ -426,7 +427,7 @@ const TaxPlanning = () => {
           {/* Content */}
           <div className="p-4 space-y-3">
             {/* Personal Tax Planning */}
-            <div 
+            <div
               onClick={() => {
                 setSelectedServiceType('personal');
                 setShowServiceTypeModal(false);
@@ -445,7 +446,7 @@ const TaxPlanning = () => {
             </div>
 
             {/* Business Tax Strategy */}
-            <div 
+            <div
               onClick={() => {
                 setSelectedServiceType('business');
                 setShowServiceTypeModal(false);
@@ -489,7 +490,7 @@ const TaxPlanning = () => {
               </h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">{stats.totalApplications} total applications</p>
             </div>
-            <button 
+            <button
               onClick={() => setShowServiceTypeModal(true)}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
             >
@@ -664,11 +665,10 @@ const TaxPlanning = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-3 py-2 text-sm font-semibold rounded transition-colors ${
-                          currentPage === page
+                        className={`px-3 py-2 text-sm font-semibold rounded transition-colors ${currentPage === page
                             ? 'bg-green-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -687,7 +687,7 @@ const TaxPlanning = () => {
           </div>
         </>
       )}
-      
+
       {/* View Application Details Modal */}
       {showModal && selectedPlan && (
         <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -761,12 +761,12 @@ const TaxPlanning = () => {
                       'previousYearTax': 'Previous Year Tax',
                       'status': 'Status'
                     };
-                    
+
                     return Object.entries(data)
-                      .filter(([key, value]) => 
-                        !excludeFields.includes(key) && 
-                        value !== null && 
-                        value !== undefined && 
+                      .filter(([key, value]) =>
+                        !excludeFields.includes(key) &&
+                        value !== null &&
+                        value !== undefined &&
                         value !== '' &&
                         key !== 'fullData' &&
                         typeof value !== 'object'
@@ -789,7 +789,7 @@ const TaxPlanning = () => {
               {(() => {
                 const documents = selectedPlan.documents || {};
                 const hasDocuments = documents && typeof documents === 'object' && Object.keys(documents).length > 0;
-                
+
                 return hasDocuments ? (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -802,7 +802,7 @@ const TaxPlanning = () => {
                           if (!docPath || typeof docPath !== 'string') return null;
                           const docName = docPath.split('\\').pop().split('/').pop();
                           const displayName = docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                          
+
                           return (
                             <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg hover:bg-green-50 transition-colors">
                               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -814,7 +814,7 @@ const TaxPlanning = () => {
                                   <span className="text-xs text-gray-500 block truncate">{docName}</span>
                                 </div>
                               </div>
-                              <button 
+                              <button
                                 onClick={() => downloadDocument(docPath)}
                                 className="flex items-center gap-2 px-4 py-2 text-green-600 hover:bg-green-100 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ml-2 flex-shrink-0"
                               >
@@ -836,7 +836,7 @@ const TaxPlanning = () => {
 
       {/* Service Type Selection Modal */}
       <ServiceTypeModal />
-      
+
       {/* Personal Tax Planning Form Modal */}
       {selectedServiceType === 'personal' && (
         <div className="fixed top-20 left-0 right-0 z-40 overflow-y-auto max-h-[calc(100vh-80px)]">
@@ -849,7 +849,7 @@ const TaxPlanning = () => {
               >
                 <X className="w-5 h-5" />
               </button>
-              
+
               {/* Form Content - Only Form Section */}
               <div className="pt-12 pb-8">
                 <Personal_tax_planning isPopupMode={true} onPopupClose={() => setSelectedServiceType(null)} />
@@ -858,7 +858,7 @@ const TaxPlanning = () => {
           </div>
         </div>
       )}
-      
+
       {/* Business Tax Planning Form Modal */}
       {selectedServiceType === 'business' && (
         <div className="fixed top-20 left-0 right-0 z-40 overflow-y-auto max-h-[calc(100vh-80px)]">
@@ -871,7 +871,7 @@ const TaxPlanning = () => {
               >
                 <X className="w-5 h-5" />
               </button>
-              
+
               {/* Form Content - Only Form Section */}
               <div className="pt-12 pb-8">
                 <Business_Tax_planning isPopupMode={true} onPopupClose={() => setSelectedServiceType(null)} />

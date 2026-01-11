@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Building2, Eye, CheckCircle, XCircle, Clock, Filter, Search, Download, AlertCircle, FileText, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api.config';
 
 // Helper function to format date properly
 const formatDate = (dateString) => {
@@ -26,13 +27,13 @@ const CorporateServicesManagement = () => {
     try {
       // Extract filename from path
       const fileName = docPath.split('/').pop().split('\\').pop();
-      
+
       // Construct download URL
-      const downloadUrl = `http://127.0.0.1:8000/${docPath}`;
-      
+      const downloadUrl = `${API_BASE_URL}/${docPath}`;
+
       const response = await fetch(downloadUrl);
       if (!response.ok) throw new Error('Download failed');
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -41,7 +42,7 @@ const CorporateServicesManagement = () => {
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      
+
       // Cleanup
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
@@ -75,7 +76,7 @@ const CorporateServicesManagement = () => {
   const exportToCSV = () => {
     // CSV Headers
     const headers = ['Application ID', 'Company Name', 'Contact Person', 'Email', 'Phone', 'Service Type', 'Status', 'Applied On'];
-    
+
     // CSV Rows
     const rows = filteredApplications.map(app => [
       app._id || app.id || '',
@@ -87,13 +88,13 @@ const CorporateServicesManagement = () => {
       app.status || '',
       formatDate(app.created_at)
     ]);
-    
+
     // Combine headers and rows
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-    
+
     // Create and download CSV file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
@@ -142,17 +143,17 @@ const CorporateServicesManagement = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/business-services/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/business-services/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched stats:', data);
-        
+
         if (data.success && data.stats) {
           setStats({
             total: data.stats.total || 0,
@@ -173,7 +174,7 @@ const CorporateServicesManagement = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Build query parameters for backend filtering
       const params = new URLSearchParams();
       if (filterServiceType && filterServiceType !== 'all') {
@@ -182,24 +183,24 @@ const CorporateServicesManagement = () => {
       if (filterStatus && filterStatus !== 'all') {
         params.append('status', filterStatus);
       }
-      
-      const url = `http://127.0.0.1:8000/api/business-services/all-applications${params.toString() ? '?' + params.toString() : ''}`;
+
+      const url = `${API_BASE_URL}/api/business-services/all-applications${params.toString() ? '?' + params.toString() : ''}`;
       console.log('Fetching applications with filters:', url);
-      
+
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched corporate services data:', data);
-        
+
         // Check if data is an array or has applications property
         const applicationsData = Array.isArray(data) ? data : (data.applications || data.data || []);
-        
+
         // Transform the data to match our component's expected structure
         const transformedData = applicationsData.map((app, index) => ({
           _id: app._id || app.id,
@@ -238,7 +239,7 @@ const CorporateServicesManagement = () => {
           // All other fields from API
           ...app
         }));
-        
+
         setApplications(transformedData);
         // Refresh stats after fetching applications
         fetchStats();
@@ -257,7 +258,7 @@ const CorporateServicesManagement = () => {
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/business-services/${applicationId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/business-services/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -269,20 +270,20 @@ const CorporateServicesManagement = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Status updated successfully:', data);
-        
+
         // Show success message
         alert(`✅ Status successfully updated to "${newStatus}"!`);
-        
+
         // Update the current application in state
         setSelectedApplication(prev => ({
           ...prev,
           status: newStatus
         }));
-        
+
         // Refresh the applications list
         fetchApplications();
         fetchStats();
-        
+
         // Close modal after a short delay
         setTimeout(() => {
           setShowDetailsModal(false);
@@ -301,14 +302,14 @@ const CorporateServicesManagement = () => {
   // Now only filter by search query since status and service type are filtered by backend
   const filteredApplications = applications.filter(app => {
     if (!searchQuery) return true;
-    
-    const matchesSearch = 
+
+    const matchesSearch =
       app.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.contact_person?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.phone?.includes(searchQuery) ||
       app.service_type?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesSearch;
   });
 
@@ -341,13 +342,13 @@ const CorporateServicesManagement = () => {
   const getStatusIcon = (status) => {
     const lowerStatus = status?.toLowerCase();
     if (lowerStatus === 'pending') return <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
-    if (lowerStatus === 'approved') 
+    if (lowerStatus === 'approved')
       return <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
-    if (lowerStatus === 'in progress' || lowerStatus === 'in-progress' || lowerStatus === 'in_progress' || lowerStatus === 'under review' || lowerStatus === 'under_review') 
+    if (lowerStatus === 'in progress' || lowerStatus === 'in-progress' || lowerStatus === 'in_progress' || lowerStatus === 'under review' || lowerStatus === 'under_review')
       return <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
-    if (lowerStatus === 'completed') 
+    if (lowerStatus === 'completed')
       return <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
-    if (lowerStatus === 'rejected') 
+    if (lowerStatus === 'rejected')
       return <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
     return <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
   };
@@ -443,7 +444,7 @@ const CorporateServicesManagement = () => {
             ))}
           </select>
 
-          <button 
+          <button
             onClick={exportToCSV}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2.5 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-all text-xs sm:text-sm md:text-base font-medium touch-manipulation"
           >
@@ -530,10 +531,10 @@ const CorporateServicesManagement = () => {
                                 'Payroll Services': 'payroll-services',
                                 'Accounting & Bookkeeping': 'accounting-bookkeeping'
                               };
-                              
+
                               const endpoint = serviceEndpointMap[app.service_type];
                               if (endpoint) {
-                                const response = await fetch(`http://127.0.0.1:8000/api/business-services/${endpoint}/${app.id}`);
+                                const response = await fetch(`${API_BASE_URL}/api/business-services/${endpoint}/${app.id}`);
                                 if (response.ok) {
                                   const data = await response.json();
                                   if (data.success && data.application) {
@@ -616,10 +617,10 @@ const CorporateServicesManagement = () => {
                         'Payroll Services': 'payroll-services',
                         'Accounting & Bookkeeping': 'accounting-bookkeeping'
                       };
-                      
+
                       const endpoint = serviceEndpointMap[app.service_type];
                       if (endpoint) {
-                        const response = await fetch(`http://127.0.0.1:8000/api/business-services/${endpoint}/${app.id}`);
+                        const response = await fetch(`${API_BASE_URL}/api/business-services/${endpoint}/${app.id}`);
                         if (response.ok) {
                           const data = await response.json();
                           if (data.success && data.application) {
@@ -664,7 +665,7 @@ const CorporateServicesManagement = () => {
                 >
                   Previous
                 </button>
-                
+
                 {/* Page Numbers */}
                 <div className="hidden sm:flex gap-1">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -678,28 +679,27 @@ const CorporateServicesManagement = () => {
                     } else {
                       pageNum = currentPage - 2 + i;
                     }
-                    
+
                     return (
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all touch-manipulation ${
-                          currentPage === pageNum
+                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all touch-manipulation ${currentPage === pageNum
                             ? 'bg-indigo-600 text-white shadow-md'
                             : 'border-2 border-gray-300 hover:bg-indigo-50 hover:border-indigo-500 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </button>
                     );
                   })}
                 </div>
-                
+
                 {/* Mobile Page Indicator */}
                 <div className="sm:hidden px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-xs font-semibold text-gray-700">
                   {currentPage} / {totalPages}
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
@@ -792,7 +792,7 @@ const CorporateServicesManagement = () => {
                 const fullData = selectedApplication.fullData || selectedApplication;
                 const documents = fullData.documents || {};
                 const hasDocuments = documents && typeof documents === 'object' && Object.keys(documents).length > 0;
-                
+
                 return (
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-5 rounded-lg border-2 border-blue-200">
                     <div className="flex items-center gap-2 mb-3">
@@ -806,7 +806,7 @@ const CorporateServicesManagement = () => {
                             if (!docPath || typeof docPath !== 'string') return null;
                             const docName = docPath.split('\\').pop().split('/').pop();
                             const displayName = docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                            
+
                             return (
                               <div key={index} className="bg-white p-3 rounded-lg border border-blue-200 hover:border-blue-400 transition-all">
                                 <div className="flex items-center justify-between gap-2">
@@ -846,11 +846,10 @@ const CorporateServicesManagement = () => {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication._id || selectedApplication.id, 'Pending')}
                     disabled={selectedApplication.status === 'Pending'}
-                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${
-                      selectedApplication.status === 'Pending'
+                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${selectedApplication.status === 'Pending'
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:from-yellow-600 hover:to-yellow-700 active:from-yellow-700 active:to-yellow-800 shadow-md hover:shadow-lg'
-                    }`}
+                      }`}
                   >
                     <Clock className="w-4 h-4" />
                     Pending
@@ -858,11 +857,10 @@ const CorporateServicesManagement = () => {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication._id || selectedApplication.id, 'Approved')}
                     disabled={selectedApplication.status === 'Approved'}
-                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${
-                      selectedApplication.status === 'Approved'
+                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${selectedApplication.status === 'Approved'
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 active:from-blue-700 active:to-blue-800 shadow-md hover:shadow-lg'
-                    }`}
+                      }`}
                   >
                     <CheckCircle className="w-4 h-4" />
                     Approved
@@ -870,11 +868,10 @@ const CorporateServicesManagement = () => {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication._id || selectedApplication.id, 'Completed')}
                     disabled={selectedApplication.status === 'Completed'}
-                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${
-                      selectedApplication.status === 'Completed'
+                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${selectedApplication.status === 'Completed'
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 active:from-green-700 active:to-green-800 shadow-md hover:shadow-lg'
-                    }`}
+                      }`}
                   >
                     <CheckCircle className="w-4 h-4" />
                     Completed
@@ -882,11 +879,10 @@ const CorporateServicesManagement = () => {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication._id || selectedApplication.id, 'Rejected')}
                     disabled={selectedApplication.status === 'Rejected'}
-                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${
-                      selectedApplication.status === 'Rejected'
+                    className={`px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg transition-all text-xs sm:text-sm font-bold touch-manipulation flex items-center justify-center gap-2 ${selectedApplication.status === 'Rejected'
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 shadow-md hover:shadow-lg'
-                    }`}
+                      }`}
                   >
                     <XCircle className="w-4 h-4" />
                     Rejected

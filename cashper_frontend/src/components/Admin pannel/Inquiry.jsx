@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  Phone, 
-  Mail, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import { API_BASE_URL } from '../../config/api.config';
+import {
+  Calendar,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   XCircle,
   Eye,
   Download,
@@ -50,7 +51,7 @@ const Inquiry = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Check if token exists
       if (!token) {
         console.error('No token found in localStorage. User may not be logged in.');
@@ -62,17 +63,17 @@ const Inquiry = () => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
-      
+
       console.log('Fetching with token:', token.substring(0, 20) + '...');
-      
+
       // Fetch all inquiries from unified endpoint
       const response = await fetch(
-        'http://localhost:8000/api/admin/inquiries/all',
+        `${API_BASE_URL}/api/admin/inquiries/all`,
         { headers }
       );
 
       let inquiriesList = [];
-      
+
       if (response.ok) {
         const data = await response.json();
         inquiriesList = data.data || [];
@@ -82,14 +83,14 @@ const Inquiry = () => {
       // Fetch contact form submissions
       try {
         const contactResponse = await fetch(
-          'http://localhost:8000/api/contact/submissions?skip=0&limit=100',
+          `${API_BASE_URL}/api/contact/submissions?skip=0&limit=100`,
           { headers }
         );
         if (contactResponse.ok) {
           const contactData = await contactResponse.json();
           const contactSubmissions = contactData.data || [];
           console.log('Fetched contact submissions:', contactSubmissions.length);
-          
+
           contactSubmissions.forEach(submission => {
             // Check if not already in the list
             if (!inquiriesList.find(i => i.id === submission.id)) {
@@ -122,14 +123,14 @@ const Inquiry = () => {
       // Also fetch personal tax consultations directly
       try {
         const ptResponse = await fetch(
-          'http://localhost:8000/api/personal-tax/consultation/all?skip=0&limit=100',
+          `${API_BASE_URL}/api/personal-tax/consultation/all?skip=0&limit=100`,
           { headers }
         );
         if (ptResponse.ok) {
           const ptData = await ptResponse.json();
           const ptConsultations = Array.isArray(ptData) ? ptData : (ptData.data || []);
           console.log('Fetched personal tax consultations:', ptConsultations.length);
-          
+
           ptConsultations.forEach(consultation => {
             // Check if not already in the list
             if (!inquiriesList.find(i => i.id === String(consultation._id))) {
@@ -159,14 +160,14 @@ const Inquiry = () => {
       // Also fetch business tax consultations directly
       try {
         const btResponse = await fetch(
-          'http://localhost:8000/api/business-tax/consultation/all?skip=0&limit=100',
+          `${API_BASE_URL}/api/business-tax/consultation/all?skip=0&limit=100`,
           { headers }
         );
         if (btResponse.ok) {
           const btData = await btResponse.json();
           const btConsultations = Array.isArray(btData) ? btData : (btData.data || []);
           console.log('Fetched business tax consultations:', btConsultations.length);
-          
+
           btConsultations.forEach(consultation => {
             // Check if not already in the list
             if (!inquiriesList.find(i => i.id === String(consultation._id))) {
@@ -196,19 +197,19 @@ const Inquiry = () => {
       // Fetch Corporate Inquiries
       try {
         const corpResponse = await fetch(
-          'http://localhost:8000/api/corporate-inquiry/admin/inquiries?limit=100',
+          `${API_BASE_URL}/api/corporate-inquiry/admin/inquiries?limit=100`,
           { headers }
         );
         if (corpResponse.ok) {
           const corpData = await corpResponse.json();
           const corpInquiries = Array.isArray(corpData) ? corpData : [];
           console.log('Fetched corporate inquiries:', corpInquiries.length);
-          
+
           corpInquiries.forEach(inquiry => {
             if (!inquiriesList.find(i => i.id === inquiry.id)) {
               // Format service type for display (e.g., "register-company" -> "Register Company")
               const formattedServiceType = formatServiceType(inquiry.serviceType);
-              
+
               // Create detailed message with company name if available
               let displayMessage = inquiry.message || '';
               if (inquiry.companyName) {
@@ -217,7 +218,7 @@ const Inquiry = () => {
               if (!displayMessage) {
                 displayMessage = `Inquiry for ${formattedServiceType} service`;
               }
-              
+
               inquiriesList.push({
                 id: inquiry.id,
                 _id: inquiry.id,
@@ -247,19 +248,19 @@ const Inquiry = () => {
       // Fetch Retail Applications
       try {
         const appResponse = await fetch(
-          'http://localhost:8000/api/applications/admin/inquiries?limit=100',
+          `${API_BASE_URL}/api/applications/admin/inquiries?limit=100`,
           { headers }
         );
         if (appResponse.ok) {
           const appData = await appResponse.json();
           const appInquiries = Array.isArray(appData) ? appData : [];
           console.log('Fetched retail applications:', appInquiries.length);
-          
+
           appInquiries.forEach(inquiry => {
             if (!inquiriesList.find(i => i.id === inquiry.id)) {
               const formattedServiceType = formatServiceType(inquiry.serviceType);
               const defaultMessage = inquiry.message || `New application for ${formattedServiceType} service. Awaiting review.`;
-              
+
               inquiriesList.push({
                 id: inquiry.id,
                 _id: inquiry.id,
@@ -283,10 +284,10 @@ const Inquiry = () => {
       } catch (error) {
         console.warn('Error fetching retail applications:', error);
       }
-      
+
       console.log('Fetched inquiries:', inquiriesList);
       console.log('Total count:', inquiriesList.length);
-      
+
       // Format inquiries with necessary fields
       const formatted = inquiriesList.map(inquiry => ({
         id: inquiry.id || inquiry._id,
@@ -324,7 +325,7 @@ const Inquiry = () => {
     const pending = consultationsList.filter(c => c.status === 'pending').length;
     const confirmed = consultationsList.filter(c => c.status === 'confirmed').length;
     const completed = consultationsList.filter(c => c.status === 'completed').length;
-    
+
     setStats({
       total: pending + confirmed + completed,
       pending: pending,
@@ -334,20 +335,20 @@ const Inquiry = () => {
   };
 
   const filteredConsultations = consultations.filter(consultation => {
-    const matchesSearch = 
+    const matchesSearch =
       consultation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       consultation.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       consultation.phone.includes(searchQuery);
-    
+
     const matchesStatus = filterStatus === 'all' || consultation.status === filterStatus;
-    
+
     // Enhanced type matching - check both productType and type fields
     const consultationType = consultation.productType || consultation.type || 'Contact Form';
-    const matchesType = filterType === 'all' || 
-                        consultationType === filterType || 
-                        consultationType.toLowerCase() === filterType.toLowerCase() ||
-                        (consultation.serviceType && formatServiceType(consultation.serviceType) === filterType);
-    
+    const matchesType = filterType === 'all' ||
+      consultationType === filterType ||
+      consultationType.toLowerCase() === filterType.toLowerCase() ||
+      (consultation.serviceType && formatServiceType(consultation.serviceType) === filterType);
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -369,7 +370,7 @@ const Inquiry = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending':
         return <Clock className="w-4 h-4" />;
       case 'confirmed':
@@ -386,9 +387,9 @@ const Inquiry = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -398,19 +399,19 @@ const Inquiry = () => {
   const handleStatusUpdate = async (consultationId, newStatus) => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Find the consultation to get its type
       const consultation = consultations.find(c => c.id === consultationId);
       if (!consultation) {
         console.error('Consultation not found');
         return;
       }
-      
+
       const inquiryType = consultation.productType || consultation.type || 'Contact Form';
-      
+
       // Call backend API to update status
       const response = await fetch(
-        'http://localhost:8000/api/admin/inquiries/' + consultationId + '/status',
+        `${API_BASE_URL}/api/admin/inquiries/${consultationId}/status`,
         {
           method: 'PATCH',
           headers: {
@@ -423,23 +424,23 @@ const Inquiry = () => {
           })
         }
       );
-      
+
       if (response.ok) {
         const result = await response.json();
         console.log('Status update response:', result);
-        
+
         // Update locally after successful backend update
-        const updatedConsultations = consultations.map(c => 
+        const updatedConsultations = consultations.map(c =>
           c.id === consultationId ? { ...c, status: newStatus } : c
         );
         setConsultations(updatedConsultations);
         updateStats(updatedConsultations);
-        
+
         // Update selected consultation if modal is open
         if (selectedConsultation && selectedConsultation.id === consultationId) {
           setSelectedConsultation({ ...selectedConsultation, status: newStatus });
         }
-        
+
         // Show success message
         const successMsg = `Inquiry ${newStatus === 'confirmed' ? 'confirmed' : newStatus === 'completed' ? 'marked as completed' : newStatus === 'cancelled' ? 'cancelled' : 'updated'} successfully!`;
         console.log(successMsg);
@@ -457,7 +458,7 @@ const Inquiry = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-4 sm:py-6 md:py-8 lg:py-12 px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
-        
+
         {/* Header Section */}
         <div className="mb-4 sm:mb-6 md:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4 md:mb-6">
@@ -573,7 +574,7 @@ const Inquiry = () => {
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")", backgroundPosition: "right 0.5rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em", paddingRight: "2.25rem" }}
               >
                 <option value="all">All Products</option>
-                
+
                 {/* Loan Services */}
                 <optgroup label="💰 Loan Services">
                   <option value="Short Term Loan">Short Term Loan</option>
@@ -770,11 +771,10 @@ const Inquiry = () => {
                   <button
                     key={pageNumber}
                     onClick={() => setCurrentPage(pageNumber)}
-                    className={`min-w-[2rem] h-8 px-2 sm:min-w-[2.5rem] sm:h-10 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation ${
-                      currentPage === pageNumber
+                    className={`min-w-[2rem] h-8 px-2 sm:min-w-[2.5rem] sm:h-10 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation ${currentPage === pageNumber
                         ? 'bg-green-600 text-white shadow-md'
                         : 'border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     {pageNumber}
                   </button>

@@ -6,6 +6,7 @@ import { CheckCircle, FileText, X, Phone, Mail, Upload, AlertCircle, User, IdCar
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { submitTDSServices } from '../../services/businessServicesApi';
+import { API_BASE_URL } from '../../config/api.config';
 
 const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
   const navigate = useNavigate();
@@ -25,13 +26,13 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
 
     const savedFormData = sessionStorage.getItem('tds_services_form_data');
     const savedStep = sessionStorage.getItem('tds_services_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -93,7 +94,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/tds-services', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/tds-services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,7 +122,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
   // Application Form Validation
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value.trim()) error = 'Full name is required';
         else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
@@ -242,7 +243,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
       return;
     }
     setCurrentStep(prev => prev + 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -251,7 +252,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -260,7 +261,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('tds_services_pending_step', '4');
       sessionStorage.setItem('tds_services_form_data', JSON.stringify(applicationForm));
@@ -281,7 +282,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
     try {
       // Call API to submit TDS services application
       const response = await submitTDSServices(applicationForm);
-      
+
       if (response.success) {
         setShowSuccessModal(true);
         toast.success('TDS services application submitted successfully!');
@@ -329,11 +330,10 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 <div className="flex justify-between items-center mb-8">
                   {[1, 2, 3, 4].map((step) => (
                     <div key={step} className="flex items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                        currentStep === step ? 'bg-green-600 text-white' :
-                        currentStep > step ? 'bg-green-200 text-green-700' :
-                        'bg-gray-200 text-gray-500'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                          currentStep > step ? 'bg-green-200 text-green-700' :
+                            'bg-gray-200 text-gray-500'
+                        }`}>
                         {step}
                       </div>
                       {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -345,7 +345,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaUser className="mr-2 text-green-600" /> Full Name *
@@ -356,9 +356,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.fullName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('fullName')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter your full name"
                       />
                       {errors.fullName && (
@@ -378,9 +377,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.email}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('email')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="your.email@example.com"
                       />
                       {errors.email && (
@@ -400,9 +398,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.phone}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('phone')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="10-digit mobile number"
                       />
                       {errors.phone && (
@@ -422,9 +419,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.panNumber}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('panNumber')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                          errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="ABCDE1234F"
                         maxLength={10}
                       />
@@ -441,7 +437,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">TDS Service Details</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaBuilding className="mr-2 text-green-600" /> Company Name *
@@ -452,9 +448,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.companyName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('companyName')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter company name"
                       />
                       {errors.companyName && (
@@ -474,9 +469,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.tanNumber}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('tanNumber')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                          errors.tanNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.tanNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="ABCD12345E"
                         maxLength={10}
                       />
@@ -497,9 +491,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.serviceType}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('serviceType')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.serviceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.serviceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                       >
                         <option value="">Select Service Type</option>
                         <option value="TDS Return Filing">TDS Return Filing</option>
@@ -525,9 +518,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.quarterYear}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('quarterYear')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.quarterYear ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.quarterYear ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="e.g., Q1 2024-25"
                       />
                       {errors.quarterYear && (
@@ -543,7 +535,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 3 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Address Information</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaHome className="mr-2 text-green-600" /> Complete Address *
@@ -554,9 +546,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('address')}
                         rows={3}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter complete address"
                       />
                       {errors.address && (
@@ -577,9 +568,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.city}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('city')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter city"
                         />
                         {errors.city && (
@@ -599,9 +589,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.state}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('state')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter state"
                         />
                         {errors.state && (
@@ -622,9 +611,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.pincode}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('pincode')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="6-digit pincode"
                         maxLength={6}
                       />
@@ -642,7 +630,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Documents</h3>
                     <p className="text-sm text-gray-600 mb-4">All documents must be in JPG, PNG, or PDF format (max 5MB each)</p>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <Upload className="mr-2 text-green-600" /> Form 16 *
@@ -795,7 +783,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
         style={{
@@ -816,7 +804,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 Complete TDS compliance services. From TAN registration to quarterly returns, we handle all your TDS requirements with expert guidance.
               </p>
               <div className="pt-2">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -829,7 +817,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                 </button>
               </div>
             </div>
-            
+
             {/* Contact Form - Right Side */}
             <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -893,13 +881,13 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-gray-100">
             <div className="prose prose-lg max-w-none">
               <p className="text-gray-700 leading-relaxed mb-6">
-                Tax Deducted at Source (TDS) is a mechanism to collect income tax at the source of income. Every business 
-                making specified payments must deduct TDS and deposit it with the government. We provide comprehensive TDS 
+                Tax Deducted at Source (TDS) is a mechanism to collect income tax at the source of income. Every business
+                making specified payments must deduct TDS and deposit it with the government. We provide comprehensive TDS
                 compliance services to help you meet your obligations accurately and on time.
               </p>
 
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Our TDS Services</h2>
-              
+
               <div className="space-y-4">
                 <div className="bg-gradient-to-r from-green-50 to-teal-50 p-5 rounded-xl border border-green-100">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">TAN Registration</h3>
@@ -1050,11 +1038,10 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                   <div className="flex justify-between items-center mb-8">
                     {[1, 2, 3, 4].map((step) => (
                       <div key={step} className="flex items-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                          currentStep === step ? 'bg-green-600 text-white' :
-                          currentStep > step ? 'bg-green-200 text-green-700' :
-                          'bg-gray-200 text-gray-500'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                            currentStep > step ? 'bg-green-200 text-green-700' :
+                              'bg-gray-200 text-gray-500'
+                          }`}>
                           {step}
                         </div>
                         {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -1066,7 +1053,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 1 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaUser className="mr-2 text-green-600" /> Full Name *
@@ -1077,9 +1064,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.fullName}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('fullName')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter your full name"
                         />
                         {errors.fullName && (
@@ -1099,9 +1085,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.email}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('email')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="your.email@example.com"
                         />
                         {errors.email && (
@@ -1121,9 +1106,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.phone}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('phone')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="10-digit mobile number"
                         />
                         {errors.phone && (
@@ -1143,9 +1127,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.panNumber}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('panNumber')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                            errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="ABCDE1234F"
                           maxLength={10}
                         />
@@ -1162,7 +1145,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 2 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">TDS Service Details</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaBuilding className="mr-2 text-green-600" /> Company Name *
@@ -1173,9 +1156,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.companyName}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('companyName')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter company name"
                         />
                         {errors.companyName && (
@@ -1195,9 +1177,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.tanNumber}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('tanNumber')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                            errors.tanNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.tanNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="ABCD12345E"
                           maxLength={10}
                         />
@@ -1218,9 +1199,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.serviceType}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('serviceType')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.serviceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.serviceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                         >
                           <option value="">Select Service Type</option>
                           <option value="TDS Return Filing">TDS Return Filing</option>
@@ -1246,9 +1226,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.quarterYear}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('quarterYear')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.quarterYear ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.quarterYear ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="e.g., Q1 2024-25"
                         />
                         {errors.quarterYear && (
@@ -1264,7 +1243,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 3 && (
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Address Information</h3>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <FaHome className="mr-2 text-green-600" /> Complete Address *
@@ -1275,9 +1254,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('address')}
                           rows={3}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter complete address"
                         />
                         {errors.address && (
@@ -1298,9 +1276,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                             value={applicationForm.city}
                             onChange={handleApplicationChange}
                             onBlur={() => handleBlur('city')}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                              errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                            }`}
+                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                              }`}
                             placeholder="Enter city"
                           />
                           {errors.city && (
@@ -1320,9 +1297,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                             value={applicationForm.state}
                             onChange={handleApplicationChange}
                             onBlur={() => handleBlur('state')}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                              errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                            }`}
+                            className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                              }`}
                             placeholder="Enter state"
                           />
                           {errors.state && (
@@ -1343,9 +1319,8 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.pincode}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('pincode')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="6-digit pincode"
                           maxLength={6}
                         />
@@ -1363,7 +1338,7 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
                     <div className="space-y-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Documents</h3>
                       <p className="text-sm text-gray-600 mb-4">All documents must be in JPG, PNG, or PDF format (max 5MB each)</p>
-                      
+
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                           <Upload className="mr-2 text-green-600" /> Form 16 *
@@ -1531,14 +1506,14 @@ const TDSServices = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

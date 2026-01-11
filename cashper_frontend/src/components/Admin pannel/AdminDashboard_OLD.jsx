@@ -18,9 +18,9 @@ const AdminDashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
-  const API_BASE_URL = 'http://127.0.0.1:8000/api/admin';
-  const WS_BASE_URL = 'ws://127.0.0.1:8000/api/admin';
-  
+  const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/admin`;
+  const WS_BASE_URL = `ws://cashper.ai/api/admin`;
+
   const wsRef = useRef(null);
   const connectionAttemptRef = useRef(0);
   const maxReconnectAttempts = 3;
@@ -65,11 +65,11 @@ const AdminDashboard = () => {
     try {
       setConnectionStatus('connecting');
       const wsUrl = `${WS_BASE_URL}/ws/dashboard`;
-      
+
       console.log('🔌 Connecting to WebSocket:', wsUrl);
-      
+
       const ws = new WebSocket(wsUrl);
-      
+
       ws.onopen = () => {
         console.log('✅ WebSocket connected');
         setIsConnected(true);
@@ -78,12 +78,12 @@ const AdminDashboard = () => {
         connectionAttemptRef.current = 0;
         setLoading(false);
       };
-      
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           console.log('📡 Real-time update:', data);
-          
+
           if (data.type === 'dashboard_update') {
             // Update stats
             if (data.stats) {
@@ -131,7 +131,7 @@ const AdminDashboard = () => {
               ];
               setStats(statsData);
             }
-            
+
             // Update performance metrics
             if (data.performance) {
               setPerformanceMetrics({
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
                 ratingMax: data.performance.rating_max || 5
               });
             }
-            
+
             // Update activities
             if (data.activities) {
               const activitiesData = data.activities.map((activity) => ({
@@ -158,18 +158,18 @@ const AdminDashboard = () => {
               }));
               setRecentActivities(activitiesData);
             }
-            
+
             // Update approvals
             if (data.approvals) {
               setPendingApprovals(data.approvals);
             }
-            
+
             // Update timestamp
             const now = new Date();
-            setLastUpdated(now.toLocaleString('en-US', { 
-              month: 'short', 
-              day: 'numeric', 
-              hour: '2-digit', 
+            setLastUpdated(now.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
               minute: '2-digit',
               second: '2-digit'
             }));
@@ -178,22 +178,22 @@ const AdminDashboard = () => {
           console.error('Error parsing WebSocket message:', err);
         }
       };
-      
+
       ws.onerror = (error) => {
         console.error('❌ WebSocket error:', error);
         setConnectionStatus('error');
       };
-      
+
       ws.onclose = () => {
         console.log('🔌 WebSocket closed');
         setIsConnected(false);
-        
+
         // Attempt reconnect
         if (connectionAttemptRef.current < maxReconnectAttempts) {
           connectionAttemptRef.current++;
           const delay = Math.pow(2, connectionAttemptRef.current) * 1000;
           console.log(`🔄 Reconnect attempt ${connectionAttemptRef.current}/${maxReconnectAttempts} in ${delay}ms`);
-          
+
           reconnectIntervalRef.current = setTimeout(() => {
             connectWebSocket();
           }, delay);
@@ -203,7 +203,7 @@ const AdminDashboard = () => {
           startFallbackPolling();
         }
       };
-      
+
       wsRef.current = ws;
     } catch (err) {
       console.error('Failed to create WebSocket:', err);
@@ -215,12 +215,12 @@ const AdminDashboard = () => {
   const startFallbackPolling = useCallback(() => {
     console.log('📊 Starting fallback polling');
     setConnectionStatus('fallback');
-    
+
     const poll = async () => {
       try {
         const token = localStorage.getItem('access_token');
         const timestamp = Date.now();
-        
+
         const [statsRes, perfRes, activitiesRes, approvalsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/dashboard/stats?t=${timestamp}`, {
             headers: {
@@ -241,7 +241,7 @@ const AdminDashboard = () => {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);
-        
+
         if (statsRes.ok && perfRes.ok && activitiesRes.ok && approvalsRes.ok) {
           const [statsData, perfData, activitiesData, approvalsData] = await Promise.all([
             statsRes.json(),
@@ -249,9 +249,9 @@ const AdminDashboard = () => {
             activitiesRes.json(),
             approvalsRes.json()
           ]);
-          
+
           console.log('✅ Fallback polling data received');
-          
+
           // Update stats
           const statsArray = [
             {
@@ -296,7 +296,7 @@ const AdminDashboard = () => {
             }
           ];
           setStats(statsArray);
-          
+
           // Update performance
           setPerformanceMetrics({
             totalLogins: perfData.total_logins || 0,
@@ -305,7 +305,7 @@ const AdminDashboard = () => {
             rating: perfData.rating || 0,
             ratingMax: perfData.rating_max || 5
           });
-          
+
           // Update activities
           if (activitiesData.activities) {
             const activities = activitiesData.activities.map((activity) => ({
@@ -321,29 +321,29 @@ const AdminDashboard = () => {
             }));
             setRecentActivities(activities);
           }
-          
+
           // Update approvals
           if (approvalsData.pending_approvals) {
             setPendingApprovals(approvalsData.pending_approvals);
           }
-          
+
           // Update timestamp
           const now = new Date();
-          setLastUpdated(now.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
+          setLastUpdated(now.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
           }));
-          
+
           setLoading(false);
         }
       } catch (err) {
         console.error('Fallback polling error:', err);
       }
     };
-    
+
     poll();
     fallbackIntervalRef.current = setInterval(poll, 10000);
   }, []);
@@ -353,7 +353,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     // Connect to WebSocket on mount
     connectWebSocket();
-    
+
     return () => {
       // Cleanup on unmount
       if (wsRef.current) {
@@ -387,9 +387,9 @@ const AdminDashboard = () => {
           },
           body: JSON.stringify({ status: 'approved' })
         });
-        
+
         if (!response.ok) throw new Error('Failed to approve');
-        
+
         alert(`${approval.type} approved successfully for ${approval.customer}!`);
       } catch (err) {
         alert('Failed to approve. Please try again.');
@@ -412,9 +412,9 @@ const AdminDashboard = () => {
             },
             body: JSON.stringify({ reason })
           });
-          
+
           if (!response.ok) throw new Error('Failed to reject');
-          
+
           alert(`${approval.type} rejected for ${approval.customer}.\nReason: ${reason}`);
         } catch (err) {
           alert('Failed to reject. Please try again.');
@@ -441,12 +441,12 @@ const AdminDashboard = () => {
   // Pagination calculations
   const totalActivitiesPages = Math.ceil(recentActivities.length / itemsPerPage);
   const totalApprovalsPages = Math.ceil(pendingApprovals.length / itemsPerPage);
-  
+
   const paginatedActivities = recentActivities.slice(
     (activitiesPage - 1) * itemsPerPage,
     activitiesPage * itemsPerPage
   );
-  
+
   const paginatedApprovals = pendingApprovals.slice(
     (approvalsPage - 1) * itemsPerPage,
     approvalsPage * itemsPerPage
@@ -514,8 +514,8 @@ const AdminDashboard = () => {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <p className="text-red-600 font-semibold">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             Retry
@@ -539,7 +539,7 @@ const AdminDashboard = () => {
                 Last update: {lastUpdated}
               </p>
             )}
-            
+
             {/* Connection Status Indicator */}
             <div className="flex items-center mt-2 text-xs">
               {connectionStatus === 'connected' && (
@@ -718,7 +718,7 @@ const AdminDashboard = () => {
               {recentActivities.length} Total
             </span>
           </div>
-          
+
           <div className="space-y-3 xs:space-y-4 mb-4">
             {paginatedActivities.length > 0 ? paginatedActivities.map((activity) => (
               <div key={activity.id} className="flex flex-row items-center justify-between p-3 xs:p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 gap-3">
@@ -782,11 +782,10 @@ const AdminDashboard = () => {
                   <button
                     key={index}
                     onClick={() => setActivitiesPage(index + 1)}
-                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${
-                      activitiesPage === index + 1
+                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${activitiesPage === index + 1
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </button>
@@ -811,14 +810,13 @@ const AdminDashboard = () => {
               {pendingApprovals.length} Pending
             </span>
           </div>
-          
+
           <div className="space-y-3 xs:space-y-4 mb-4">
             {paginatedApprovals.length > 0 ? paginatedApprovals.map((item) => (
               <div
                 key={item.id}
-                className={`p-3 xs:p-4 rounded-lg border-l-4 transition-all hover:shadow-md ${
-                  item.urgent ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'
-                }`}
+                className={`p-3 xs:p-4 rounded-lg border-l-4 transition-all hover:shadow-md ${item.urgent ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'
+                  }`}
               >
                 <div className="flex flex-row items-center justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
@@ -888,11 +886,10 @@ const AdminDashboard = () => {
                   <button
                     key={index}
                     onClick={() => setApprovalsPage(index + 1)}
-                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${
-                      approvalsPage === index + 1
+                    className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${approvalsPage === index + 1
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </button>

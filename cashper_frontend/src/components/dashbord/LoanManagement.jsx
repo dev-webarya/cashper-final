@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  IndianRupee, Calendar, TrendingUp, FileText, Clock, CheckCircle, 
+import {
+  IndianRupee, Calendar, TrendingUp, FileText, Clock, CheckCircle,
   AlertCircle, Eye, Download, ChevronRight, Plus, Filter, Search,
   CreditCard, Home, Briefcase, DollarSign, X, RefreshCw, ArrowUpRight
 } from 'lucide-react';
 import { getUserLoans, getLoanDetails } from '../../services/dashboardApi';
 import LoanFormPopup from './LoanFormPopup';
+import { API_BASE_URL } from '../../config/api.config';
 
 const LoanManagement = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -55,7 +56,7 @@ const LoanManagement = () => {
     try {
       setLoading(true);
       console.log('🔄 Fetching all loan applications...');
-      
+
       const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       if (!token) {
         console.error('❌ No authentication token found');
@@ -70,7 +71,7 @@ const LoanManagement = () => {
 
       // Fetch from all 4 loan APIs in parallel
       const [personalLoans, homeLoans, businessLoans, shortTermLoans] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/personal-loan/applications', { headers })
+        fetch(`${API_BASE_URL}/api/personal-loan/applications`, { headers })
           .then(async res => {
             console.log('Personal Loan API Status:', res.status);
             if (!res.ok) {
@@ -80,7 +81,7 @@ const LoanManagement = () => {
             return res.json();
           })
           .catch(err => { console.error('Personal Loan Fetch Error:', err); return []; }),
-        fetch('http://127.0.0.1:8000/api/home-loan/applications', { headers })
+        fetch(`${API_BASE_URL}/api/home-loan/applications`, { headers })
           .then(async res => {
             console.log('Home Loan API Status:', res.status);
             if (!res.ok) {
@@ -90,7 +91,7 @@ const LoanManagement = () => {
             return res.json();
           })
           .catch(err => { console.error('Home Loan Fetch Error:', err); return []; }),
-        fetch('http://127.0.0.1:8000/api/business-loan/applications', { headers })
+        fetch(`${API_BASE_URL}/api/business-loan/applications`, { headers })
           .then(async res => {
             console.log('Business Loan API Status:', res.status);
             if (!res.ok) {
@@ -100,7 +101,7 @@ const LoanManagement = () => {
             return res.json();
           })
           .catch(err => { console.error('Business Loan Fetch Error:', err); return []; }),
-        fetch('http://127.0.0.1:8000/api/short-term-loan/applications', { headers })
+        fetch(`${API_BASE_URL}/api/short-term-loan/applications`, { headers })
           .then(async res => {
             console.log('🎯 Short Term Loan API Status:', res.status);
             if (!res.ok) {
@@ -112,16 +113,16 @@ const LoanManagement = () => {
             console.log('✅ Short Term Loan Data Received:', data);
             return data;
           })
-          .catch(err => { 
-            console.error('❌ Short Term Loan Fetch Error:', err); 
-            return []; 
+          .catch(err => {
+            console.error('❌ Short Term Loan Fetch Error:', err);
+            return [];
           })
       ]);
 
-      console.log('📊 API Response Counts:', { 
-        personal: personalLoans?.length || 0, 
-        home: homeLoans?.length || 0, 
-        business: businessLoans?.length || 0, 
+      console.log('📊 API Response Counts:', {
+        personal: personalLoans?.length || 0,
+        home: homeLoans?.length || 0,
+        business: businessLoans?.length || 0,
         shortTerm: shortTermLoans?.length || 0
       });
 
@@ -133,7 +134,7 @@ const LoanManagement = () => {
         personalLoans.forEach(loan => {
           // Parse documents string if present
           const parsedDocs = loan.documents ? parseDocuments(loan.documents) : {};
-          
+
           allLoans.push({
             id: loan._id || loan.id || `PL${Date.now()}${Math.random()}`,
             type: 'Personal Loan',
@@ -361,7 +362,7 @@ const LoanManagement = () => {
     .filter(loan => {
       // Status filter
       const statusMatch = statusFilter === 'all' || loan.status === statusFilter;
-      
+
       // Service type filter
       let serviceMatch = true;
       if (serviceFilter === 'all') serviceMatch = true;
@@ -369,11 +370,11 @@ const LoanManagement = () => {
       else if (serviceFilter === 'personal') serviceMatch = loan.type === 'Personal Loan';
       else if (serviceFilter === 'home') serviceMatch = loan.type === 'Home Loan';
       else if (serviceFilter === 'business') serviceMatch = loan.type === 'Business Loan';
-      
+
       // Search filter
       const searchMatch = loan.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
         loan.status.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       return statusMatch && serviceMatch && searchMatch;
     });
 
@@ -436,7 +437,7 @@ const LoanManagement = () => {
       
       Progress: ${((loan.completedTenure / loan.tenure) * 100).toFixed(1)}% Complete
     `;
-    
+
     const blob = new Blob([statementContent], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -516,7 +517,7 @@ const LoanManagement = () => {
       </body>
       </html>
     `;
-    
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       newWindow.document.write(documentsHTML);
@@ -533,13 +534,13 @@ const LoanManagement = () => {
     const progressPercentage = ((loan.completedTenure / loan.tenure) * 100).toFixed(1);
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 " onClick={onClose}>
-        <div 
+        <div
           className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className={`bg-gradient-to-r ${loan.color} p-6 text-white relative`}>
-            <button 
+            <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
               title="Close"
@@ -720,9 +721,9 @@ const LoanManagement = () => {
                 ].map((doc, index) => {
                   const hasDocument = loan[doc.field];
                   const fileName = doc.fileName || `${loan.id}_${doc.field}.png`;
-                  
+
                   if (!hasDocument) return null;
-                  
+
                   return (
                     <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 hover:shadow-md transition-all">
                       <div className="flex items-center gap-4">
@@ -738,14 +739,14 @@ const LoanManagement = () => {
                         onClick={async () => {
                           try {
                             // Download document - force download without opening
-                            const documentUrl = loan[doc.field].startsWith('http') 
-                              ? loan[doc.field] 
-                              : `http://127.0.0.1:8000${loan[doc.field]}`;
-                            
+                            const documentUrl = loan[doc.field].startsWith('http')
+                              ? loan[doc.field]
+                              : `${API_BASE_URL}${loan[doc.field]}`;
+
                             // Fetch the file as blob
                             const response = await fetch(documentUrl);
                             const blob = await response.blob();
-                            
+
                             // Create blob URL and trigger download
                             const blobUrl = window.URL.createObjectURL(blob);
                             const link = document.createElement('a');
@@ -754,7 +755,7 @@ const LoanManagement = () => {
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
-                            
+
                             // Cleanup blob URL
                             window.URL.revokeObjectURL(blobUrl);
                           } catch (error) {
@@ -788,7 +789,7 @@ const LoanManagement = () => {
                   <span className="text-sm font-bold text-purple-600">{progressPercentage}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                  <div 
+                  <div
                     className={`h-4 rounded-full bg-gradient-to-r ${loan.color} transition-all duration-500`}
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
@@ -801,7 +802,7 @@ const LoanManagement = () => {
             )}
 
             {loan.status === 'Active' && (
-              <button 
+              <button
                 onClick={() => handlePayEMI(loan)}
                 className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg shadow-lg hover:shadow-xl"
               >
@@ -836,7 +837,7 @@ const LoanManagement = () => {
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage and track all your loans in one place</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowLoanTypeModal(true)}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
         >
@@ -858,7 +859,7 @@ const LoanManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl shadow-md border-l-4 border-green-600">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="w-full">
@@ -970,7 +971,7 @@ const LoanManagement = () => {
                           <span className="font-bold text-green-600">{progressPercentage}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="h-2 rounded-full bg-gradient-to-r from-green-600 to-green-400"
                             style={{ width: `${progressPercentage}%` }}
                           ></div>
@@ -1017,11 +1018,10 @@ const LoanManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-8 h-8 text-xs sm:text-sm rounded-lg transition-colors ${
-                          currentPage === page
+                        className={`w-8 h-8 text-xs sm:text-sm rounded-lg transition-colors ${currentPage === page
                             ? 'bg-green-600 text-white'
                             : 'border border-gray-300 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -1138,11 +1138,10 @@ const LoanManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -1177,12 +1176,12 @@ const LoanManagement = () => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <h3 className="text-lg md:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 pr-8">
               Apply for Loan
             </h3>
             <p className="text-sm sm:text-base text-gray-600 mb-4 md:mb-6">Choose the type of loan you want to apply for</p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {[
                 { name: 'Personal Loan', icon: FileText, route: '/personal-loan', color: 'from-blue-500 to-blue-600', desc: 'Quick personal loans' },
@@ -1215,7 +1214,7 @@ const LoanManagement = () => {
 
       {/* Loan Form Popup */}
       {selectedLoanType && (
-        <LoanFormPopup 
+        <LoanFormPopup
           loanType={selectedLoanType}
           onClose={() => setSelectedLoanType(null)}
         />

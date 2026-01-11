@@ -1,5 +1,6 @@
-import { API_ROOT } from '../config/api';
-const API_BASE_URL = `${API_ROOT}/api/admin/tax-planning`;
+import { API_BASE_URL as BASE_URL } from '../config/api.config';
+
+const API_BASE_URL = `${BASE_URL}/api/admin/tax-planning`;
 
 // Helper function to get auth headers with better error handling
 const getAuthHeaders = () => {
@@ -349,7 +350,7 @@ export const getTaxPlanningDocuments = async (params = {}) => {
  */
 export const downloadTaxPlanningDocument = async (documentId) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/api/admin/documents/${documentId}/download`, {
+    const response = await fetch(`${BASE_URL}/api/admin/documents/${documentId}/download`, {
       method: 'GET',
       headers: getAuthHeaders()
     });
@@ -375,7 +376,7 @@ export const downloadTaxPlanningDocument = async (documentId) => {
  */
 export const updateDocumentStatus = async (documentId, status) => {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/api/admin/documents/${documentId}/status`, {
+    const response = await fetch(`${BASE_URL}/api/admin/documents/${documentId}/status`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify({ status })

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaShieldAlt, FaUsers, FaFileAlt, FaBalanceScale, FaChartLine } from 'react-icons/fa';
@@ -50,7 +51,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
 
     const savedFormData = sessionStorage.getItem('pf_services_form_data');
     const savedStep = sessionStorage.getItem('pf_services_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -107,7 +108,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/provident-fund', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/provident-fund`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -156,8 +157,8 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const validateStep = (step) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    switch(step) {
+
+    switch (step) {
       case 1:
         if (!formData.name.trim()) {
           toast.error('⚠️ Please enter your name');
@@ -236,7 +237,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
     if (validateStep(currentStep)) {
       setCompletedSteps(prev => [...new Set([...prev, currentStep])]);
       setCurrentStep(prev => prev + 1);
-      
+
       const formSection = document.getElementById('application-form-section');
       if (formSection) {
         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -246,7 +247,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const handlePreviousStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -255,7 +256,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('pf_services_pending_step', '4');
       sessionStorage.setItem('pf_services_form_data', JSON.stringify(formData));
@@ -269,12 +270,12 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
     if (!validateStep(4)) return;
 
     setIsSubmittingApplication(true);
-    
+
     try {
       // Call API to submit provident fund services application
       const submissionData = { ...formData, ...documents };
       const response = await submitProvidentFundServices(submissionData);
-      
+
       if (response.success) {
         const applicationNumber = 'PF' + Date.now();
         if (isPopupMode) {
@@ -593,13 +594,12 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                         Previous
                       </button>
                     )}
-                    
+
                     <button
                       type="submit"
                       disabled={isSubmittingApplication}
-                      className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl ${
-                        currentStep === 1 ? 'ml-auto' : ''
-                      } ${isSubmittingApplication ? 'opacity-75 cursor-not-allowed' : ''}`}
+                      className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl ${currentStep === 1 ? 'ml-auto' : ''
+                        } ${isSubmittingApplication ? 'opacity-75 cursor-not-allowed' : ''}`}
                     >
                       {isSubmittingApplication ? (
                         <>Processing...</>
@@ -643,7 +643,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
       {/* Hero Section with Contact Form */}
       <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-16 sm:pb-20 md:pb-24 overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 z-0"
           style={{
             backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3")',
@@ -680,7 +680,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                 </div>
               </div>
               <div className="pt-4">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -699,7 +699,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
               <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur-sm">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Get Started Today</h3>
                 <p className="text-gray-600 mb-6 text-sm sm:text-base">Fill in your details and we'll get back to you</p>
-                
+
                 <form onSubmit={handleHeroFormSubmit} className="space-y-2 sm:space-y-3">
                   <input
                     type="text"
@@ -862,7 +862,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                 description: 'We automate PF calculations, deductions, and monthly ECR filing through our expert team.'
               }
             ].map((item, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transform hover:scale-105 transition-all"
               >
@@ -953,7 +953,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                 ]
               }
             ].map((service, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all border-t-4 border-green-600"
               >
@@ -1066,12 +1066,12 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                   <div className="mb-8 sm:mb-10">
                     <div className="flex items-center justify-between relative">
                       <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 -z-10">
-                        <div 
+                        <div
                           className="h-full bg-green-600 transition-all duration-500"
                           style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
                         ></div>
                       </div>
-                      
+
                       {[
                         { num: 1, label: 'Personal' },
                         { num: 2, label: 'PF Details' },
@@ -1079,11 +1079,10 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                         { num: 4, label: 'Documents' }
                       ].map((step) => (
                         <div key={step.num} className="flex flex-col items-center">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 ${
-                            currentStep >= step.num 
-                              ? 'bg-green-600 text-white shadow-lg' 
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300 ${currentStep >= step.num
+                              ? 'bg-green-600 text-white shadow-lg'
                               : 'bg-gray-200 text-gray-500'
-                          } ${completedSteps.includes(step.num) ? 'ring-4 ring-green-200' : ''}`}>
+                            } ${completedSteps.includes(step.num) ? 'ring-4 ring-green-200' : ''}`}>
                             {completedSteps.includes(step.num) ? <CheckCircle className="w-5 h-5" /> : step.num}
                           </div>
                           <span className="text-xs mt-2 font-medium text-gray-600 hidden sm:block">{step.label}</span>
@@ -1369,13 +1368,12 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                           Previous
                         </button>
                       )}
-                      
+
                       <button
                         type="submit"
                         disabled={isSubmittingApplication}
-                        className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl ${
-                          currentStep === 1 ? 'ml-auto' : ''
-                        } ${isSubmittingApplication ? 'opacity-75 cursor-not-allowed' : ''}`}
+                        className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl ${currentStep === 1 ? 'ml-auto' : ''
+                          } ${isSubmittingApplication ? 'opacity-75 cursor-not-allowed' : ''}`}
                       >
                         {isSubmittingApplication ? (
                           <>Processing...</>
@@ -1405,7 +1403,7 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h3>
                     <p className="text-gray-600 mb-6">Your PF service request has been received.</p>
-                    
+
                     <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-6 max-w-md mx-auto">
                       <p className="text-sm text-gray-600 mb-2">Your Application Number</p>
                       <p className="text-3xl font-bold text-green-600">PF{Date.now()}</p>
@@ -1470,14 +1468,14 @@ const ProvidentFundServices = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

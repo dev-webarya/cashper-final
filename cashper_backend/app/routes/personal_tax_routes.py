@@ -57,9 +57,9 @@ def calculate_income_tax(income: float) -> float:
 @router.post("/consultation/book", response_model=TaxConsultationBookingResponse, status_code=status.HTTP_201_CREATED)
 def book_tax_consultation(booking: TaxConsultationBookingRequest):
     """
-    Book a free tax consultation (PUBLIC - No authentication required)
+    Book a tax consultation (PUBLIC - No authentication required)
     
-    This endpoint is for the "BOOK FREE TAX CONSULTATION" form in the hero section.
+    This endpoint is for the "BOOK TAX CONSULTATION" form in the hero section.
     
     Required fields:
     - name: Full name (min 3 characters)

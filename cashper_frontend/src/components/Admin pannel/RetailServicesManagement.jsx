@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, FileText, Eye, CheckCircle, XCircle, Clock, Filter, Search, Download, AlertCircle, User } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api.config';
 
 // Helper function to format date properly
 const formatDate = (dateString) => {
@@ -67,7 +68,7 @@ const RetailServicesManagement = () => {
       'business_proof': 'Business Proof',
       'businessProof': 'Business Proof'
     };
-    
+
     return nameMap[docKey] || docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -77,41 +78,41 @@ const RetailServicesManagement = () => {
       console.log('📥 Downloading document:', { docKey, applicationId });
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `http://127.0.0.1:8000/api/retail-services/admin/applications/${applicationId}/documents/${docKey}`,
+        `${API_BASE_URL}/api/retail-services/admin/applications/${applicationId}/documents/${docKey}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         }
       );
-      
+
       console.log('📡 Response status:', response.status);
-      
+
       if (response.ok) {
         const blob = await response.blob();
         console.log('📦 Blob size:', blob.size, 'bytes');
-        
+
         if (blob.size === 0) {
           console.error('❌ Downloaded file is empty');
           alert('Downloaded file is empty. Please check if the file was uploaded correctly.');
           return;
         }
-        
+
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        
+
         // Get filename from Content-Disposition header or use default
         const contentDisposition = response.headers.get('content-disposition');
         let filename = `${getDocumentDisplayName(docKey)}.pdf`;
-        
+
         if (contentDisposition) {
           const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
           if (matches != null && matches[1]) {
             filename = matches[1].replace(/['"]/g, '');
           }
         }
-        
+
         console.log('💾 Saving as:', filename);
         link.download = filename;
         document.body.appendChild(link);
@@ -144,7 +145,7 @@ const RetailServicesManagement = () => {
   const exportToCSV = () => {
     // CSV Headers
     const headers = ['Application ID', 'Name', 'Email', 'Phone', 'Service Type', 'Status', 'Applied On'];
-    
+
     // CSV Rows
     const rows = filteredApplications.map(app => [
       app._id || app.id || '',
@@ -155,13 +156,13 @@ const RetailServicesManagement = () => {
       app.status || '',
       formatDate(app.created_at)
     ]);
-    
+
     // Combine headers and rows
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-    
+
     // Create and download CSV file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
@@ -225,13 +226,13 @@ const RetailServicesManagement = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/retail-services/admin/applications', {
+      const response = await fetch(`${API_BASE_URL}/api/retail-services/admin/applications`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Fetched applications:', data.length);
@@ -251,13 +252,13 @@ const RetailServicesManagement = () => {
   const fetchApplicationDetails = async (applicationId) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/retail-services/admin/applications/${applicationId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/retail-services/admin/applications/${applicationId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Fetched application details:', data);
@@ -281,13 +282,13 @@ const RetailServicesManagement = () => {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/retail-services/admin/statistics', {
+      const response = await fetch(`${API_BASE_URL}/api/retail-services/admin/statistics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Fetched statistics:', data);
@@ -301,7 +302,7 @@ const RetailServicesManagement = () => {
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/retail-services/admin/applications/${applicationId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/retail-services/admin/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -312,11 +313,11 @@ const RetailServicesManagement = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('✅ Status updated:', result);
-        
+
         // Refresh both applications and statistics
         await fetchApplications();
         await fetchStatistics();
-        
+
         setShowDetailsModal(false);
         alert(`✅ Status successfully updated to: ${newStatus}`);
       } else {
@@ -332,21 +333,21 @@ const RetailServicesManagement = () => {
 
   const filteredApplications = applications.filter(app => {
     // Search filter - check multiple fields
-    const matchesSearch = !searchQuery || 
+    const matchesSearch = !searchQuery ||
       app.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.phone?.includes(searchQuery) ||
       app.application_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.service_type?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Status filter - case insensitive comparison
-    const matchesStatus = filterStatus === 'all' || 
+    const matchesStatus = filterStatus === 'all' ||
       app.status?.toLowerCase() === filterStatus.toLowerCase();
-    
+
     // Service type filter - exact match
-    const matchesServiceType = filterServiceType === 'all' || 
+    const matchesServiceType = filterServiceType === 'all' ||
       app.service_type === filterServiceType;
-    
+
     return matchesSearch && matchesStatus && matchesServiceType;
   });
 
@@ -369,7 +370,7 @@ const RetailServicesManagement = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Pending': return <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
       case 'In-Progress': return <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
       case 'Approved': return <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
@@ -502,7 +503,7 @@ const RetailServicesManagement = () => {
             ))}
           </select>
 
-          <button 
+          <button
             onClick={exportToCSV}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2.5 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-all text-xs sm:text-sm md:text-base font-medium touch-manipulation"
           >
@@ -680,7 +681,7 @@ const RetailServicesManagement = () => {
                 >
                   Previous
                 </button>
-                
+
                 {/* Page Numbers */}
                 <div className="hidden sm:flex gap-1">
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -694,28 +695,27 @@ const RetailServicesManagement = () => {
                     } else {
                       pageNum = currentPage - 2 + i;
                     }
-                    
+
                     return (
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all touch-manipulation ${
-                          currentPage === pageNum
+                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all touch-manipulation ${currentPage === pageNum
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border-2 border-gray-300 hover:bg-green-50 hover:border-green-500 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </button>
                     );
                   })}
                 </div>
-                
+
                 {/* Mobile Page Indicator */}
                 <div className="sm:hidden px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-xs font-semibold text-gray-700">
                   {currentPage} / {totalPages}
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}

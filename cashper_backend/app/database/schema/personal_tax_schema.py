@@ -38,10 +38,10 @@ class ConsultationStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-# ===================== BOOK FREE TAX CONSULTATION =====================
+# ===================== BOOK TAX CONSULTATION =====================
 
 class TaxConsultationBookingRequest(BaseModel):
-    """Schema for booking free tax consultation (Hero section form)"""
+    """Schema for booking tax consultation (Hero section form)"""
     name: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
     phone: str = Field(..., min_length=10, max_length=15)

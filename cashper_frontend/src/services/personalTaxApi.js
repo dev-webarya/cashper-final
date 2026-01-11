@@ -30,7 +30,7 @@ export const PERSONAL_TAX_ENDPOINTS = {
 // ===================== PUBLIC API FUNCTIONS =====================
 
 /**
- * Book a free tax consultation (Hero Section Form)
+ * Book a tax consultation (Hero Section Form)
  * @param {object} consultationData - Consultation booking data
  * @param {string} consultationData.name - Full name
  * @param {string} consultationData.email - Email address

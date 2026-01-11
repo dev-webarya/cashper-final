@@ -141,7 +141,7 @@ const Contactus = () => {
     {
       category: 'tax',
       question: "How can your tax planning services help me save taxes legally?",
-      answer: "Our certified tax consultants help you maximize deductions and save taxes:\n\n💼 Personal Tax Planning:\n• Section 80C: Up to ₹1.5L (ELSS, PPF, Insurance)\n• Section 80D: Up to ₹25K-₹1L (Health insurance)\n• Section 24: Up to ₹2L (Home loan interest)\n• HRA & LTA optimization\n• Tax-efficient salary structuring\n\n🏢 Business Tax Strategy:\n• GST compliance & optimization\n• Corporate tax planning\n• Depreciation benefits\n• Capital gains tax planning\n• Expense optimization\n\nWe ensure 100% legal compliance while maximizing your tax savings. Free tax audit for business clients.",
+      answer: "Our certified tax consultants help you maximize deductions and save taxes:\n\n💼 Personal Tax Planning:\n• Section 80C: Up to ₹1.5L (ELSS, PPF, Insurance)\n• Section 80D: Up to ₹25K-₹1L (Health insurance)\n• Section 24: Up to ₹2L (Home loan interest)\n• HRA & LTA optimization\n• Tax-efficient salary structuring\n\n🏢 Business Tax Strategy:\n• GST compliance & optimization\n• Corporate tax planning\n• Depreciation benefits\n• Capital gains tax planning\n• Expense optimization\n\nWe ensure 100% legal compliance while maximizing your tax savings. Tax audit for business clients.",
       highlight: "Save up to ₹1.5L in taxes"
     },
     {
