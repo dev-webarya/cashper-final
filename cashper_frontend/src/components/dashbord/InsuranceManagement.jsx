@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, Heart, Car, Home, Briefcase, Users, Calendar, 
-  IndianRupee, CheckCircle, Clock, AlertCircle, X, Eye, 
+import {
+  Shield, Heart, Car, Home, Briefcase, Users, Calendar,
+  IndianRupee, CheckCircle, Clock, AlertCircle, X, Eye,
   Download, RefreshCw, Plus, Search, Filter, TrendingUp, DollarSign, FileText, ArrowUpRight
 } from 'lucide-react';
-import { 
-  getHealthInsuranceApplications, 
-  getMotorInsuranceApplications, 
-  getTermInsuranceApplications 
+import {
+  getHealthInsuranceApplications,
+  getMotorInsuranceApplications,
+  getTermInsuranceApplications
 } from '../../services/dashboardApi';
 import HomeServiceFormPopup from './HomeServiceFormPopup';
+import { API_BASE_URL } from '../../config/api.config';
 
 const InsuranceManagement = () => {
   const [insurancePolicies, setInsurancePolicies] = useState([]);
@@ -27,7 +28,7 @@ const InsuranceManagement = () => {
   useEffect(() => {
     // Initial fetch on component mount
     fetchInsurancePolicies();
-    
+
     // Only refresh when page comes into focus (user switches tabs)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -35,16 +36,16 @@ const InsuranceManagement = () => {
         fetchInsurancePolicies();
       }
     };
-    
+
     // Refresh when window gains focus
     const handleWindowFocus = () => {
       console.log('Window focused - refreshing data');
       fetchInsurancePolicies();
     };
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleWindowFocus);
-    
+
     return () => {
       console.log('Cleaning up insurance management effects');
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -57,7 +58,7 @@ const InsuranceManagement = () => {
       // Don't set loading to true on auto-refresh to avoid UI flicker
       const isAutoRefresh = !document.hidden;
       if (!isAutoRefresh) setLoading(true);
-      
+
       // Fetch all three insurance types from specific APIs
       const [healthResponse, motorResponse, termResponse] = await Promise.all([
         getHealthInsuranceApplications().catch(err => {
@@ -73,14 +74,14 @@ const InsuranceManagement = () => {
           return [];
         })
       ]);
-      
+
       console.log('Health Insurance Apps:', healthResponse);
       console.log('Motor Insurance Apps:', motorResponse);
       console.log('Term Insurance Apps:', termResponse);
-      
+
       // Combine all applications with proper type assignment
       let allPolicies = [];
-      
+
       // Add health insurance applications
       if (Array.isArray(healthResponse) && healthResponse.length > 0) {
         console.log('Adding', healthResponse.length, 'health applications');
@@ -89,7 +90,7 @@ const InsuranceManagement = () => {
           type: 'Health Insurance'
         })));
       }
-      
+
       // Add motor insurance applications
       if (Array.isArray(motorResponse) && motorResponse.length > 0) {
         console.log('Adding', motorResponse.length, 'motor applications');
@@ -98,7 +99,7 @@ const InsuranceManagement = () => {
           type: 'Motor Insurance'
         })));
       }
-      
+
       // Add term insurance applications
       if (Array.isArray(termResponse) && termResponse.length > 0) {
         console.log('Adding', termResponse.length, 'term applications');
@@ -107,13 +108,13 @@ const InsuranceManagement = () => {
           type: 'Term Insurance'
         })));
       }
-      
+
       console.log('Total Combined Policies:', allPolicies.length);
-      
+
       // Transform policies with proper data mapping
       const transformedPolicies = allPolicies.map((policy, index) => {
         let icon, color, bgColor;
-        
+
         if (policy.type === 'Health Insurance') {
           icon = Heart;
           color = 'from-red-600 to-pink-600';
@@ -131,7 +132,7 @@ const InsuranceManagement = () => {
           color = 'from-purple-600 to-pink-600';
           bgColor = 'bg-purple-50';
         }
-        
+
         return {
           ...policy,
           id: policy.id || `policy-${index}-${Date.now()}`,
@@ -145,10 +146,10 @@ const InsuranceManagement = () => {
           benefits: policy.benefits || []
         };
       });
-      
+
       console.log('Transformed Policies Count:', transformedPolicies.length);
       console.log('Transformed Policies:', transformedPolicies);
-      
+
       setInsurancePolicies(transformedPolicies);
     } catch (error) {
       console.error('Error fetching insurance policies:', error);
@@ -222,19 +223,19 @@ const InsuranceManagement = () => {
         const filterStatus = statusFilter.toLowerCase();
         statusMatch = policyStatus === filterStatus;
       }
-      
+
       // Service type filter
       let serviceMatch = true;
       if (serviceFilter === 'all') serviceMatch = true;
       else if (serviceFilter === 'health') serviceMatch = policy.type === 'Health Insurance';
       else if (serviceFilter === 'motor') serviceMatch = policy.type === 'Motor Insurance' || policy.type === 'Vehicle Insurance';
       else if (serviceFilter === 'term') serviceMatch = policy.type === 'Term Insurance';
-      
+
       // Search filter
       const searchMatch = policy.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (policy.policyNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (policy.provider || '').toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       return statusMatch && serviceMatch && searchMatch;
     });
 
@@ -268,7 +269,7 @@ const InsuranceManagement = () => {
     }).length,
     health: insurancePolicies.filter(p => p.type === 'Health Insurance').length,
     motor: insurancePolicies.filter(p => p.type === 'Motor Insurance').
-    length,
+      length,
     term: insurancePolicies.filter(p => p.type === 'Term Insurance').length,
     expiring: insurancePolicies.filter(p => {
       const status = (p.status || '').toLowerCase();
@@ -299,9 +300,9 @@ const InsuranceManagement = () => {
   const handleViewDetails = async (policy) => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       console.log('🔍 Viewing details for policy:', policy);
-      
+
       // Determine the correct API endpoint based on insurance type
       let endpoint = '';
       if (policy.type === 'Health Insurance') {
@@ -311,22 +312,22 @@ const InsuranceManagement = () => {
       } else if (policy.type === 'Term Insurance') {
         endpoint = 'term-insurance';
       }
-      
+
       if (endpoint && policy._id) {
-        console.log(`📡 Fetching from: http://localhost:8000/api/${endpoint}/applications/${policy._id}`);
-        
-        const response = await fetch(`http://localhost:8000/api/${endpoint}/applications/${policy._id}`, {
+        console.log(`📡 Fetching from: ${API_BASE_URL}/api/${endpoint}/applications/${policy._id}`);
+
+        const response = await fetch(`${API_BASE_URL}/api/${endpoint}/applications/${policy._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Fetched full application details:', data);
           console.log('📄 Documents in response:', data.documents);
-          
+
           setSelectedPolicy({
             ...policy,
             fullData: data
@@ -356,13 +357,13 @@ const InsuranceManagement = () => {
   const downloadDocument = async (documentPath) => {
     try {
       console.log('📥 Original document path:', documentPath);
-      
+
       // Extract filename from path
       const fileName = documentPath.split('/').pop().split('\\').pop();
-      
+
       // Normalize the path
       let normalizedPath = documentPath;
-      
+
       // Check if it's an absolute Windows path
       if (documentPath.includes(':\\')) {
         // Extract only the relative path after 'uploads'
@@ -371,24 +372,24 @@ const InsuranceManagement = () => {
           normalizedPath = documentPath.substring(uploadsIndex);
         }
       }
-      
+
       // Convert backslashes to forward slashes for URL
       normalizedPath = normalizedPath.replace(/\\/g, '/');
-      
+
       // Construct download URL
-      const downloadUrl = `http://localhost:8000/${normalizedPath}`;
-      
+      const downloadUrl = `${API_BASE_URL}/${normalizedPath}`;
+
       console.log('📥 Download URL:', downloadUrl);
-      
+
       const token = localStorage.getItem('access_token');
       const response = await fetch(downloadUrl, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      
+
       if (!response.ok) {
         throw new Error(`Download failed with status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -398,7 +399,7 @@ const InsuranceManagement = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       console.log('✅ Download successful:', fileName);
     } catch (error) {
       console.error('❌ Error downloading document:', error);
@@ -424,7 +425,7 @@ const InsuranceManagement = () => {
       Additional Details:
       - Days to Renewal: ${policy.daysToRenewal || 'N/A'}
     `;
-    
+
     const blob = new Blob([reportContent], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -491,7 +492,7 @@ const InsuranceManagement = () => {
       </body>
       </html>
     `;
-    
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       newWindow.document.write(documentsHTML);
@@ -516,7 +517,7 @@ const InsuranceManagement = () => {
     const daysUntilExpiry = getDaysUntilExpiry(policy.endDate);
 
     return (
-      <div 
+      <div
         className="fixed inset-0 z-50  flex items-center justify-center p-4"
         onClick={(e) => {
           // Only close if clicking on the backdrop itself
@@ -526,7 +527,7 @@ const InsuranceManagement = () => {
         }}
         style={{ overflow: 'hidden' }}
       >
-        <div 
+        <div
           className="bg-white  shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
           onClick={(e) => e.stopPropagation()}
           style={{ scrollBehavior: 'smooth' }}
@@ -537,7 +538,7 @@ const InsuranceManagement = () => {
               <h2 className="text-xl sm:text-2xl font-bold">{policy.type}</h2>
               <p className="text-green-100 text-sm mt-1">Policy: {policy.policyNumber}</p>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="p-1.5 hover:bg-green-800 rounded-full transition-colors"
             >
@@ -561,10 +562,10 @@ const InsuranceManagement = () => {
                 {(() => {
                   const data = policy.fullData || policy;
                   const excludeFields = ['_id', 'user_id', 'created_at', 'updated_at', 'documents', 'icon', 'color', 'fullData', '__v'];
-                  
+
                   // Document field patterns to exclude from policy information
                   const documentFieldPatterns = ['aadhar', 'aadhaar', 'pan', 'photo', 'signature', 'medical', 'id_proof', 'address_proof', 'income_proof', 'vehicle_rc', 'driving_license', 'passport'];
-                  
+
                   const fieldLabels = {
                     'policyNumber': 'Policy Number',
                     'applicationNumber': 'Application Number',
@@ -606,28 +607,28 @@ const InsuranceManagement = () => {
                     'state': 'State',
                     'pincode': 'Pincode'
                   };
-                  
+
                   return Object.entries(data)
                     .filter(([key, value]) => {
                       // Exclude basic fields
                       if (excludeFields.includes(key)) return false;
-                      
+
                       // Exclude document fields (any field that looks like a file path)
                       const keyLower = key.toLowerCase();
                       const isDocumentField = documentFieldPatterns.some(pattern => keyLower.includes(pattern));
                       if (isDocumentField) return false;
-                      
+
                       // Exclude if value looks like a file path
                       const valueStr = String(value);
                       if (valueStr.includes('uploads/') || valueStr.includes('\\') || valueStr.match(/\.(jpg|jpeg|png|pdf|doc|docx)$/i)) {
                         return false;
                       }
-                      
+
                       // Exclude null, undefined, empty values and objects
                       if (value === null || value === undefined || value === '' || typeof value === 'object') {
                         return false;
                       }
-                      
+
                       return true;
                     })
                     .map(([key, value]) => (
@@ -647,15 +648,15 @@ const InsuranceManagement = () => {
             {/* Uploaded Documents Section */}
             {(() => {
               const data = policy.fullData || policy;
-              
+
               // Check for documents in multiple places
               let documents = {};
-              
+
               // First check if documents object exists
               if (data.documents && typeof data.documents === 'object') {
                 documents = { ...data.documents };
               }
-              
+
               // Also check for individual document fields in the data
               const documentFieldPatterns = ['aadhar', 'aadhaar', 'pan', 'photo', 'signature', 'medical', 'id_proof', 'address_proof', 'income_proof', 'vehicle_rc', 'driving_license', 'passport'];
               Object.entries(data).forEach(([key, value]) => {
@@ -663,16 +664,16 @@ const InsuranceManagement = () => {
                 const isDocField = documentFieldPatterns.some(pattern => keyLower.includes(pattern));
                 const valueStr = String(value);
                 const isFilePath = valueStr.includes('uploads/') || valueStr.includes('\\') || valueStr.match(/\.(jpg|jpeg|png|pdf|doc|docx)$/i);
-                
+
                 if ((isDocField || isFilePath) && value && typeof value === 'string') {
                   documents[key] = value;
                 }
               });
-              
+
               const hasDocuments = Object.keys(documents).length > 0;
-              
+
               console.log('📄 Documents found:', documents);
-              
+
               return hasDocuments ? (
                 <div>
                   <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -684,7 +685,7 @@ const InsuranceManagement = () => {
                       if (!docPath || typeof docPath !== 'string') return null;
                       const docName = docPath.split('\\').pop().split('/').pop();
                       const displayName = docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                      
+
                       return (
                         <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg hover:bg-gray-50 transition-colors">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -696,7 +697,7 @@ const InsuranceManagement = () => {
                               <p className="text-xs text-gray-500 truncate">{docName}</p>
                             </div>
                           </div>
-                          <button 
+                          <button
                             onClick={() => downloadDocument(docPath)}
                             className="flex items-center gap-2 px-3 py-1.5 text-teal-600 hover:text-teal-700 font-semibold text-sm transition-colors whitespace-nowrap ml-3 flex-shrink-0"
                           >
@@ -754,7 +755,7 @@ const InsuranceManagement = () => {
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage and track all your insurance policies</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <button 
+          <button
             onClick={fetchInsurancePolicies}
             disabled={loading}
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold disabled:opacity-50"
@@ -763,7 +764,7 @@ const InsuranceManagement = () => {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          <button 
+          <button
             onClick={() => setShowInsuranceTypeModal(true)}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
           >
@@ -923,11 +924,10 @@ const InsuranceManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-8 h-8 text-xs rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-8 h-8 text-xs rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -1060,11 +1060,10 @@ const InsuranceManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -1099,7 +1098,7 @@ const InsuranceManagement = () => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="mb-6">
               <h3 className="text-lg md:text-2xl font-bold text-gray-800 mb-2 pr-8">
                 Buy New Policy
@@ -1140,9 +1139,9 @@ const InsuranceManagement = () => {
 
       {/* Home Service Form Popup */}
       {selectedServiceType && (
-        <HomeServiceFormPopup 
-          serviceType={selectedServiceType} 
-          onClose={() => setSelectedServiceType(null)} 
+        <HomeServiceFormPopup
+          serviceType={selectedServiceType}
+          onClose={() => setSelectedServiceType(null)}
         />
       )}
     </div>

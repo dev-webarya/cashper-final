@@ -1827,7 +1827,7 @@ const Business_Tax_planning = ({ isPopupMode = false, onPopupClose }) => {
             <button 
               onClick={() => document.getElementById('business-contact-form').scrollIntoView({ behavior: 'smooth' })}
               className="bg-white text-green-700 font-semibold px-8 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 text-base text-center transform hover:scale-105 active:scale-95">
-              Get Free Tax Consultation
+              Get Tax Consultation
             </button>
             <Link
               to="/contact"

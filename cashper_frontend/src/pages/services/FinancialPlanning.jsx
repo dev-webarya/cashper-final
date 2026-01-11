@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
@@ -155,7 +156,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/financial-planning', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/financial-planning`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -190,7 +191,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
   };
 
   const validateStep = (step) => {
-    switch(step) {
+    switch (step) {
       case 1:
         if (!formData.name || !formData.name.trim()) {
           toast.error('⚠️ Full name is required');
@@ -273,8 +274,8 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
         position: 'top-center',
         autoClose: 3000
       });
-      navigate(`/login?redirect=/services/financial-planning&step=2`, { 
-        state: { from: '/services/financial-planning', returnStep: 2 } 
+      navigate(`/login?redirect=/services/financial-planning&step=2`, {
+        state: { from: '/services/financial-planning', returnStep: 2 }
       });
       return;
     }
@@ -298,8 +299,8 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
       sessionStorage.setItem('financial_planning_pending_step', '4');
       sessionStorage.setItem('financial_planning_form_data', JSON.stringify(formData));
       toast.error('Please login to submit your application');
-      navigate('/login?redirect=/services/financial-planning&step=4', { 
-        state: { from: '/services/financial-planning', returnStep: 4 } 
+      navigate('/login?redirect=/services/financial-planning&step=4', {
+        state: { from: '/services/financial-planning', returnStep: 4 }
       });
       return;
     }
@@ -362,7 +363,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
     <>
       {!isPopupMode && <Navbar />}
       <div className="w-full overflow-x-hidden bg-white">
-        
+
         {/* Hero Section */}
         {!isPopupMode && <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
           style={{
@@ -383,7 +384,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                   Achieve your financial goals with expert guidance from certified financial planners. We offer personalized investment planning, retirement strategies, tax optimization, and wealth management solutions tailored to your unique needs.
                 </p>
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => {
                       const element = document.getElementById('apply-form');
                       if (element) {
@@ -396,7 +397,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Contact Form - Right Side */}
               <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -470,9 +471,9 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                 </p>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=800&q=80" 
-                  alt="Financial Planning" 
+                <img
+                  src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=800&q=80"
+                  alt="Financial Planning"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -771,18 +772,16 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                     {[1, 2, 3, 4].map((step) => (
                       <div key={step} className="flex items-center flex-1">
                         <div className="flex flex-col items-center flex-1">
-                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
-                            currentStep === step 
-                              ? 'bg-green-600 text-white scale-110 shadow-lg' 
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${currentStep === step
+                              ? 'bg-green-600 text-white scale-110 shadow-lg'
                               : completedSteps.includes(step)
-                              ? 'bg-green-600 text-white'
-                              : 'bg-gray-200 text-gray-500'
-                          }`}>
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-200 text-gray-500'
+                            }`}>
                             {completedSteps.includes(step) ? <CheckCircle className="w-6 h-6" /> : step}
                           </div>
-                          <span className={`text-xs sm:text-sm mt-2 font-medium ${
-                            currentStep === step ? 'text-green-600' : 'text-gray-500'
-                          }`}>
+                          <span className={`text-xs sm:text-sm mt-2 font-medium ${currentStep === step ? 'text-green-600' : 'text-gray-500'
+                            }`}>
                             {step === 1 && 'Personal'}
                             {step === 2 && 'Financial'}
                             {step === 3 && 'Address'}
@@ -790,9 +789,8 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                           </span>
                         </div>
                         {step < 4 && (
-                          <div className={`h-1 flex-1 transition-all duration-300 ${
-                            completedSteps.includes(step) ? 'bg-green-600' : 'bg-gray-200'
-                          }`} />
+                          <div className={`h-1 flex-1 transition-all duration-300 ${completedSteps.includes(step) ? 'bg-green-600' : 'bg-gray-200'
+                            }`} />
                         )}
                       </div>
                     ))}
@@ -1269,7 +1267,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
                           Previous
                         </button>
                       )}
-                      
+
                       {currentStep < 4 ? (
                         <button
                           type="button"
@@ -1342,7 +1340,7 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
             <p className="text-lg sm:text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
               Don't wait until the last minute. Get expert assistance and start your comprehensive financial planning today!
             </p>
-            <button 
+            <button
               onClick={handleContactClick}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-10 py-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 text-lg"
             >
@@ -1397,14 +1395,14 @@ const FinancialPlanning = ({ isPopupMode = false, onPopupClose = null }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

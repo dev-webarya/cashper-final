@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL, getAssetUrl } from '../../config/api.config';
 import { useLocation } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
@@ -47,7 +48,7 @@ const AdminPanel = () => {
         }
 
         // Then fetch fresh data from API
-        const response = await fetch('http://127.0.0.1:8000/api/auth/profile', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -94,14 +95,14 @@ const AdminPanel = () => {
     // Update localStorage
     localStorage.setItem('adminProfile', JSON.stringify(updatedProfile));
   };
-  
+
   // Function to refresh profile from server
   const refreshAdminProfile = async () => {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,11 +122,11 @@ const AdminPanel = () => {
       console.error('Failed to refresh admin profile:', error);
     }
   };
-  
+
   // Sync activeView with URL path
   useEffect(() => {
     const path = location.pathname;
-    
+
     if (path === '/admin/dashboard' || path === '/admin') {
       setActiveView('dashboard');
     } else if (path === '/admin/users') {
@@ -154,7 +155,7 @@ const AdminPanel = () => {
       setActiveView('notifications');
     }
   }, [location]);
-  
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -213,7 +214,7 @@ const AdminPanel = () => {
       priority: 'medium',
       recipients: 'all'
     });
-    
+
     const allNotifications = [
       { id: 1, type: 'loan', title: 'New Loan Applications', message: '5 new loan applications pending review', time: '5 min ago', unread: true, priority: 'high' },
       { id: 2, type: 'user', title: 'User Registrations', message: '12 new users registered today', time: '1 hour ago', unread: true, priority: 'medium' },
@@ -227,16 +228,16 @@ const AdminPanel = () => {
       { id: 10, type: 'user', title: 'Support Tickets', message: '4 new support tickets received', time: '1 day ago', unread: false, priority: 'medium' },
     ];
 
-    const filteredNotifications = filter === 'all' 
-      ? allNotifications 
+    const filteredNotifications = filter === 'all'
+      ? allNotifications
       : filter === 'unread'
-      ? allNotifications.filter(n => n.unread)
-      : allNotifications.filter(n => n.type === filter);
+        ? allNotifications.filter(n => n.unread)
+        : allNotifications.filter(n => n.type === filter);
 
     const unreadCount = allNotifications.filter(n => n.unread).length;
 
     const getNotificationIcon = (type) => {
-      switch(type) {
+      switch (type) {
         case 'loan':
           return (
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -304,7 +305,7 @@ const AdminPanel = () => {
             <p className="text-sm sm:text-base text-gray-600 mt-1">{unreadCount} unread notifications</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-            <button 
+            <button
               onClick={() => setShowSendModal(true)}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold text-sm transition-all active:scale-95"
             >
@@ -334,11 +335,10 @@ const AdminPanel = () => {
               <button
                 key={filterOption.value}
                 onClick={() => setFilter(filterOption.value)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all active:scale-95 ${
-                  filter === filterOption.value
-                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all active:scale-95 ${filter === filterOption.value
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {filterOption.label}
               </button>
@@ -362,15 +362,14 @@ const AdminPanel = () => {
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer p-3 sm:p-4 md:p-5 border-l-4 ${
-                  notification.unread 
-                    ? 'border-l-green-600 bg-gradient-to-r from-green-50 to-white' 
-                    : 'border-l-gray-300'
-                }`}
+                className={`bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer p-3 sm:p-4 md:p-5 border-l-4 ${notification.unread
+                  ? 'border-l-green-600 bg-gradient-to-r from-green-50 to-white'
+                  : 'border-l-gray-300'
+                  }`}
               >
                 <div className="flex items-start gap-3 sm:gap-4">
                   {getNotificationIcon(notification.type)}
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -383,11 +382,11 @@ const AdminPanel = () => {
                       </div>
                       {getPriorityBadge(notification.priority)}
                     </div>
-                    
+
                     <p className="text-xs sm:text-sm md:text-base text-gray-700 mb-2 leading-relaxed">
                       {notification.message}
                     </p>
-                    
+
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,17 +394,17 @@ const AdminPanel = () => {
                         </svg>
                         {notification.time}
                       </span>
-                      
+
                       <button className="text-green-700 hover:text-green-800 font-semibold hover:underline">
                         View Details
                       </button>
-                      
+
                       {notification.unread && (
                         <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">
                           Mark as Read
                         </button>
                       )}
-                      
+
                       <button className="text-red-600 hover:text-red-700 font-semibold hover:underline">
                         Delete
                       </button>
@@ -481,12 +480,11 @@ const AdminPanel = () => {
                     ].map((option) => (
                       <button
                         key={option.value}
-                        onClick={() => setNewNotification({...newNotification, recipients: option.value})}
-                        className={`p-3 rounded-lg border-2 text-left transition-all active:scale-95 ${
-                          newNotification.recipients === option.value
-                            ? 'border-blue-600 bg-blue-50 shadow-md'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                        }`}
+                        onClick={() => setNewNotification({ ...newNotification, recipients: option.value })}
+                        className={`p-3 rounded-lg border-2 text-left transition-all active:scale-95 ${newNotification.recipients === option.value
+                          ? 'border-blue-600 bg-blue-50 shadow-md'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                          }`}
                       >
                         <div className="text-xl mb-1">{option.icon}</div>
                         <div className="text-xs sm:text-sm font-semibold text-gray-900">{option.label}</div>
@@ -502,52 +500,47 @@ const AdminPanel = () => {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     <button
-                      onClick={() => setNewNotification({...newNotification, type: 'alert'})}
-                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                        newNotification.type === 'alert'
-                          ? 'bg-red-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewNotification({ ...newNotification, type: 'alert' })}
+                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${newNotification.type === 'alert'
+                        ? 'bg-red-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       Alert
                     </button>
                     <button
-                      onClick={() => setNewNotification({...newNotification, type: 'loan'})}
-                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                        newNotification.type === 'loan'
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewNotification({ ...newNotification, type: 'loan' })}
+                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${newNotification.type === 'loan'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       Loan
                     </button>
                     <button
-                      onClick={() => setNewNotification({...newNotification, type: 'insurance'})}
-                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                        newNotification.type === 'insurance'
-                          ? 'bg-purple-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewNotification({ ...newNotification, type: 'insurance' })}
+                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${newNotification.type === 'insurance'
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       Insurance
                     </button>
                     <button
-                      onClick={() => setNewNotification({...newNotification, type: 'investment'})}
-                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                        newNotification.type === 'investment'
-                          ? 'bg-orange-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewNotification({ ...newNotification, type: 'investment' })}
+                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${newNotification.type === 'investment'
+                        ? 'bg-orange-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       Investment
                     </button>
                     <button
-                      onClick={() => setNewNotification({...newNotification, type: 'user'})}
-                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${
-                        newNotification.type === 'user'
-                          ? 'bg-green-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setNewNotification({ ...newNotification, type: 'user' })}
+                      className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 ${newNotification.type === 'user'
+                        ? 'bg-green-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
                     >
                       User
                     </button>
@@ -567,12 +560,11 @@ const AdminPanel = () => {
                     ].map((priority) => (
                       <button
                         key={priority.value}
-                        onClick={() => setNewNotification({...newNotification, priority: priority.value})}
-                        className={`p-3 rounded-lg border-2 text-center transition-all active:scale-95 ${
-                          newNotification.priority === priority.value
-                            ? 'border-blue-600 bg-blue-50 shadow-md'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                        }`}
+                        onClick={() => setNewNotification({ ...newNotification, priority: priority.value })}
+                        className={`p-3 rounded-lg border-2 text-center transition-all active:scale-95 ${newNotification.priority === priority.value
+                          ? 'border-blue-600 bg-blue-50 shadow-md'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                          }`}
                       >
                         <div className="text-2xl mb-1">{priority.icon}</div>
                         <div className="text-xs sm:text-sm font-bold text-gray-900">{priority.label}</div>
@@ -590,7 +582,7 @@ const AdminPanel = () => {
                   <input
                     type="text"
                     value={newNotification.title}
-                    onChange={(e) => setNewNotification({...newNotification, title: e.target.value})}
+                    onChange={(e) => setNewNotification({ ...newNotification, title: e.target.value })}
                     placeholder="Enter notification title..."
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     maxLength={100}
@@ -605,7 +597,7 @@ const AdminPanel = () => {
                   </label>
                   <textarea
                     value={newNotification.message}
-                    onChange={(e) => setNewNotification({...newNotification, message: e.target.value})}
+                    onChange={(e) => setNewNotification({ ...newNotification, message: e.target.value })}
                     placeholder="Enter your message here..."
                     rows="4"
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
@@ -708,7 +700,7 @@ const AdminPanel = () => {
           const token = localStorage.getItem('access_token');
           if (!token) return;
 
-          const response = await fetch('http://localhost:8000/api/auth/profile', {
+          const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -727,11 +719,11 @@ const AdminPanel = () => {
               profileImage: data.profileImage || null,
               lastLogin: data.lastLogin || null
             });
-            
+
             if (data.profileImage) {
-              const imageUrl = data.profileImage.startsWith('http') 
-                ? data.profileImage 
-                : `http://localhost:8000${data.profileImage}`;
+              const imageUrl = data.profileImage.startsWith('http')
+                ? data.profileImage
+                : getAssetUrl(data.profileImage);
               setPreviewImage(imageUrl);
             }
           }
@@ -754,14 +746,14 @@ const AdminPanel = () => {
           alert('Please upload an image file');
           return;
         }
-        
+
         // Show preview immediately
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreviewImage(reader.result);
         };
         reader.readAsDataURL(file);
-        
+
         // Upload immediately
         try {
           const token = localStorage.getItem('access_token');
@@ -773,7 +765,7 @@ const AdminPanel = () => {
           const formData = new FormData();
           formData.append('profileImage', file);
 
-          const response = await fetch('http://localhost:8000/api/auth/profile', {
+          const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -784,20 +776,20 @@ const AdminPanel = () => {
           if (response.ok) {
             const updatedProfile = await response.json();
             alert('Profile picture uploaded successfully! ✅');
-            
+
             // Update profile data
             setProfileData(prev => ({
               ...prev,
               profileImage: updatedProfile.profileImage
             }));
-            
+
             // Update parent component and cache
             if (updatedProfile.profileImage) {
-              const imageUrl = updatedProfile.profileImage.startsWith('http') 
-                ? updatedProfile.profileImage 
-                : `http://localhost:8000${updatedProfile.profileImage}`;
+              const imageUrl = updatedProfile.profileImage.startsWith('http')
+                ? updatedProfile.profileImage
+                : getAssetUrl(updatedProfile.profileImage);
               setPreviewImage(imageUrl);
-              
+
               // Update navbar profile
               updateAdminProfile({
                 profileImage: updatedProfile.profileImage,
@@ -827,19 +819,19 @@ const AdminPanel = () => {
           alert('Please login again');
           return;
         }
-        
+
         // Send removal flag to backend
         const formData = new FormData();
         formData.append('removeProfileImage', 'true');
-        
-        const response = await fetch('http://localhost:8000/api/auth/profile', {
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`
           },
           body: formData
         });
-        
+
         if (response.ok) {
           const updatedProfile = await response.json();
           setPreviewImage(null);
@@ -847,10 +839,10 @@ const AdminPanel = () => {
             ...prev,
             profileImage: null
           }));
-          
+
           // Update navbar profile
           updateAdminProfile({ profileImage: null });
-          
+
           if (fileInputRef.current) {
             fileInputRef.current.value = '';
           }
@@ -876,7 +868,7 @@ const AdminPanel = () => {
         }
 
         const formData = new FormData();
-        
+
         // Add all editable fields (NOT email and role as they should not be changed)
         if (profileData.fullName && profileData.fullName.trim()) {
           formData.append('fullName', profileData.fullName.trim());
@@ -893,7 +885,7 @@ const AdminPanel = () => {
         if (profileData.department && profileData.department.trim()) {
           formData.append('department', profileData.department.trim());
         }
-        
+
         // Add profile image if it's a File object
         if (profileData.profileImage && profileData.profileImage instanceof File) {
           formData.append('profileImage', profileData.profileImage);
@@ -904,7 +896,7 @@ const AdminPanel = () => {
           console.log(`${key}: ${value instanceof File ? `File(${value.name})` : value}`);
         }
 
-        const response = await fetch('http://localhost:8000/api/auth/profile', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -918,7 +910,7 @@ const AdminPanel = () => {
 
         if (response.ok) {
           alert('Profile updated successfully! ✅');
-          
+
           // Update profile data state with response values (only editable fields)
           setProfileData(prev => ({
             ...prev,
@@ -930,21 +922,21 @@ const AdminPanel = () => {
             profileImage: updatedProfile.profileImage !== undefined ? updatedProfile.profileImage : prev.profileImage,
             lastLogin: updatedProfile.lastLogin !== undefined ? updatedProfile.lastLogin : prev.lastLogin
           }));
-          
+
           // Update navbar profile with updated data
           updateAdminProfile({
             fullName: updatedProfile.fullName,
             profileImage: updatedProfile.profileImage
           });
-          
+
           // Update preview image if changed
           if (updatedProfile.profileImage) {
-            const imageUrl = updatedProfile.profileImage.startsWith('http') 
-              ? updatedProfile.profileImage 
-              : `http://localhost:8000${updatedProfile.profileImage}`;
+            const imageUrl = updatedProfile.profileImage.startsWith('http')
+              ? updatedProfile.profileImage
+              : getAssetUrl(updatedProfile.profileImage);
             setPreviewImage(imageUrl);
           }
-          
+
           setIsEditing(false);
         } else {
           const errorMessage = updatedProfile.detail || 'Unknown error';
@@ -960,7 +952,7 @@ const AdminPanel = () => {
     };
 
     const handleInputChange = (field, value) => {
-      setProfileData({...profileData, [field]: value});
+      setProfileData({ ...profileData, [field]: value });
     };
 
     return (
@@ -970,7 +962,7 @@ const AdminPanel = () => {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">My Profile</h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your personal information and profile picture</p>
           </div>
-          <button 
+          <button
             onClick={() => setIsEditing(!isEditing)}
             className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold text-sm sm:text-base transition-all active:scale-95 flex items-center justify-center gap-2"
           >
@@ -989,15 +981,15 @@ const AdminPanel = () => {
             </svg>
             Profile Picture
           </h2>
-          
+
           <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
             {/* Image Display */}
             <div className="relative group">
               {previewImage ? (
                 <div className="relative">
-                  <img 
-                    src={previewImage} 
-                    alt="Profile" 
+                  <img
+                    src={previewImage}
+                    alt="Profile"
                     className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-green-600 shadow-2xl"
                   />
                   {isEditing && (
@@ -1025,7 +1017,7 @@ const AdminPanel = () => {
               <p className="text-xs sm:text-sm text-gray-600 mb-4">
                 Click the button below to upload a new profile picture
               </p>
-              
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -1033,16 +1025,15 @@ const AdminPanel = () => {
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              
+
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={!isEditing}
-                  className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                    isEditing
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white active:scale-95 cursor-pointer'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${isEditing
+                    ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white active:scale-95 cursor-pointer'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1053,11 +1044,10 @@ const AdminPanel = () => {
                   <button
                     onClick={handleRemoveImage}
                     disabled={!isEditing}
-                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                      isEditing
-                        ? 'bg-red-100 hover:bg-red-200 text-red-700 active:scale-95 cursor-pointer'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
+                    className={`px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${isEditing
+                      ? 'bg-red-100 hover:bg-red-200 text-red-700 active:scale-95 cursor-pointer'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1066,10 +1056,10 @@ const AdminPanel = () => {
                   </button>
                 )}
               </div>
-              
+
               <div className="mt-3 space-y-1">
                 <p className="text-xs text-gray-500">• Recommended size: 400x400 pixels</p>
-                <p className="text-xs text-gray-500">• Maximum file size: 5MB</p>
+                <p className="text-xs text-gray-500">• Maximum file size: 2MB</p>
                 <p className="text-xs text-gray-500">• Supported formats: JPG, PNG, GIF</p>
               </div>
             </div>
@@ -1090,22 +1080,21 @@ const AdminPanel = () => {
               <h3 className="text-base sm:text-lg font-bold text-gray-900 border-b-2 border-green-600 pb-2">Personal Information</h3>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={profileData.fullName}
                   onChange={(e) => handleInputChange('fullName', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${
-                    isEditing 
-                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${isEditing
+                    ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-200 bg-gray-50'
+                    }`}
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={profileData.email}
                   disabled={true}
                   className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all bg-gray-50 border-gray-200 cursor-not-allowed`}
@@ -1115,30 +1104,28 @@ const AdminPanel = () => {
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   value={profileData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${
-                    isEditing 
-                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${isEditing
+                    ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-200 bg-gray-50'
+                    }`}
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Location</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={profileData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${
-                    isEditing 
-                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${isEditing
+                    ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-200 bg-gray-50'
+                    }`}
                 />
               </div>
             </div>
@@ -1147,9 +1134,9 @@ const AdminPanel = () => {
               <h3 className="text-base sm:text-lg font-bold text-gray-900 border-b-2 border-blue-600 pb-2">Account Details</h3>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Role</label>
-                <input 
-                  type="text" 
-                  value={profileData.role} 
+                <input
+                  type="text"
+                  value={profileData.role}
                   disabled={true}
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                   title="Role cannot be changed"
@@ -1158,40 +1145,39 @@ const AdminPanel = () => {
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Department</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={profileData.department}
                   onChange={(e) => handleInputChange('department', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${
-                    isEditing 
-                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all ${isEditing
+                    ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                    : 'border-gray-200 bg-gray-50'
+                    }`}
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Account Created</label>
-                <input 
-                  type="text" 
-                  value="January 1, 2024" 
-                  readOnly 
+                <input
+                  type="text"
+                  value="January 1, 2024"
+                  readOnly
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600"
                 />
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Last Login</label>
-                <input 
-                  type="text" 
-                  value={profileData.lastLogin ? new Date(profileData.lastLogin).toLocaleString('en-IN', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric', 
-                    hour: '2-digit', 
+                <input
+                  type="text"
+                  value={profileData.lastLogin ? new Date(profileData.lastLogin).toLocaleString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
                     minute: '2-digit',
                     second: '2-digit'
-                  }) : 'Not available'} 
-                  readOnly 
+                  }) : 'Not available'}
+                  readOnly
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600"
                 />
               </div>
@@ -1201,23 +1187,22 @@ const AdminPanel = () => {
           {/* Bio Section */}
           <div className="mt-6">
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Bio / About</label>
-            <textarea 
+            <textarea
               value={profileData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               disabled={!isEditing}
               rows="4"
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all resize-none ${
-                isEditing 
-                  ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500' 
-                  : 'border-gray-200 bg-gray-50'
-              }`}
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 rounded-lg transition-all resize-none ${isEditing
+                ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                : 'border-gray-200 bg-gray-50'
+                }`}
             ></textarea>
           </div>
 
           {/* Action Buttons */}
           {isEditing && (
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
-              <button 
+              <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-semibold text-sm sm:text-base transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1239,7 +1224,7 @@ const AdminPanel = () => {
                   </>
                 )}
               </button>
-              <button 
+              <button
                 onClick={() => setIsEditing(false)}
                 disabled={isSaving}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold text-sm sm:text-base transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1261,19 +1246,19 @@ const AdminPanel = () => {
       <div className="flex-shrink-0">
         <AdminHeader toggleSidebar={toggleSidebar} setActiveView={setActiveView} adminProfile={adminProfile} />
       </div>
-      
+
       {/* Main Content Area with Sidebar */}
       <div className="flex flex-1 relative overflow-hidden">
         {/* Sidebar - Fixed, No Scroll */}
         <div className="flex-shrink-0">
-          <AdminSidebar 
+          <AdminSidebar
             isOpen={isSidebarOpen}
             activeView={activeView}
             setActiveView={setActiveView}
             toggleSidebar={toggleSidebar}
           />
         </div>
-        
+
         {/* Main Content - Scrollable Only */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 [scroll-behavior:smooth] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
           <div className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 w-full max-w-full">
@@ -1283,7 +1268,7 @@ const AdminPanel = () => {
           </div>
         </main>
       </div>
-      
+
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
         <div

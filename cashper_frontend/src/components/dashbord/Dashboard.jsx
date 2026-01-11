@@ -101,7 +101,7 @@ const Dashboard = () => {
   // Sync activeView with URL path
   useEffect(() => {
     const path = location.pathname;
-    
+
     if (path.startsWith('/calculators') || path === '/dashboard/calculators') {
       setActiveView('calculators');
     } else if (path === '/dashboard/overview' || path === '/dashboard') {
@@ -176,7 +176,7 @@ const Dashboard = () => {
         return <DocumentsView />;
       case 'support':
         return <ContactSupportView />;
-      
+
       default:
         return <DashboardOverview />;
     }
@@ -193,11 +193,10 @@ const Dashboard = () => {
             { title: 'Insurance Renewal', message: 'Your health insurance policy is due for renewal in 15 days', time: '1 day ago', type: 'warning' },
             { title: 'EMI Payment Due', message: 'Your Home Loan EMI payment is due on Jan 5', time: '2 days ago', type: 'alert' }
           ].map((notif, i) => (
-            <div key={i} className={`p-4 rounded-lg border-l-4 ${
-              notif.type === 'success' ? 'bg-green-50 border-green-500' :
+            <div key={i} className={`p-4 rounded-lg border-l-4 ${notif.type === 'success' ? 'bg-green-50 border-green-500' :
               notif.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
-              'bg-red-50 border-red-500'
-            }`}>
+                'bg-red-50 border-red-500'
+              }`}>
               <h3 className="font-bold text-gray-800">{notif.title}</h3>
               <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
               <p className="text-xs text-gray-400 mt-2">{notif.time}</p>
@@ -246,7 +245,7 @@ const Dashboard = () => {
       // Validate file type
       const allowedTypes = ['.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx'];
       const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-      
+
       if (!allowedTypes.includes(fileExtension)) {
         setError(`Invalid file type. Allowed: ${allowedTypes.join(', ')}`);
         setTimeout(() => setError(''), 5000);
@@ -273,10 +272,10 @@ const Dashboard = () => {
 
         setSuccess('✅ Document uploaded successfully!');
         setTimeout(() => setSuccess(''), 5000);
-        
+
         // Refresh documents list
         await fetchDocuments();
-        
+
         // Reset file input
         e.target.value = '';
       } catch (err) {
@@ -290,7 +289,7 @@ const Dashboard = () => {
 
     const handleViewDocument = (doc) => {
       // Open document in new tab
-      const fullUrl = `http://127.0.0.1:8000${doc.fileUrl}`;
+      const fullUrl = `${import.meta.env.VITE_API_URL}${doc.fileUrl}`;
       window.open(fullUrl, '_blank');
     };
 
@@ -304,7 +303,7 @@ const Dashboard = () => {
 
         setSuccess('✅ Document deleted successfully!');
         setTimeout(() => setSuccess(''), 5000);
-        
+
         // Refresh documents list
         await fetchDocuments();
       } catch (err) {
@@ -331,7 +330,7 @@ const Dashboard = () => {
             <span className="text-sm font-semibold">{success}</span>
           </div>
         )}
-        
+
         {error && (
           <div className="fixed top-20 right-4 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-slideInRight max-w-md">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -344,7 +343,7 @@ const Dashboard = () => {
         {/* Header - Responsive */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">My Documents</h1>
-          <button 
+          <button
             onClick={handleUploadClick}
             disabled={uploading}
             className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -352,7 +351,7 @@ const Dashboard = () => {
             {uploading ? 'Uploading...' : 'Upload New'}
           </button>
         </div>
-        
+
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
@@ -371,7 +370,7 @@ const Dashboard = () => {
             <p className="mt-2 text-sm text-gray-500">Click "Upload New" to add your first document</p>
           </div>
         )}
-        
+
         {/* Documents Grid - Fully Responsive */}
         {!loading && documents.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -391,13 +390,13 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="mt-3 sm:mt-4 flex gap-2">
-                  <button 
+                  <button
                     onClick={() => handleViewDocument(doc)}
                     className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-95"
                   >
                     View
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDeleteDocument(doc.id)}
                     className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-95"
                   >
@@ -410,9 +409,9 @@ const Dashboard = () => {
         )}
 
         {/* Hidden File Input */}
-        <input 
+        <input
           ref={fileInputRef}
-          type="file" 
+          type="file"
           onChange={handleFileSelect}
           accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
           className="hidden"
@@ -488,7 +487,7 @@ const Dashboard = () => {
 
       if (Object.keys(errors).length === 0) {
         setSupportLoading(true);
-        
+
         try {
           await submitSupportRequest({
             name: supportForm.name,
@@ -504,8 +503,8 @@ const Dashboard = () => {
         } catch (err) {
           setSupportLoading(false);
           console.error('Error submitting support request:', err);
-          setSupportErrors({ 
-            submit: err.response?.data?.detail || 'Failed to submit support request. Please try again.' 
+          setSupportErrors({
+            submit: err.response?.data?.detail || 'Failed to submit support request. Please try again.'
           });
         }
       }
@@ -516,7 +515,7 @@ const Dashboard = () => {
       if (field === 'phone') {
         value = value.replace(/[^0-9]/g, '').slice(0, 10);
       }
-      
+
       setSupportForm(prev => ({ ...prev, [field]: value }));
       if (supportErrors[field]) {
         setSupportErrors(prev => ({ ...prev, [field]: '' }));
@@ -533,7 +532,7 @@ const Dashboard = () => {
             <span className="text-sm font-semibold">{supportSuccess}</span>
           </div>
         )}
-        
+
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Contact Support</h1>
         <div className="bg-white rounded-xl shadow-lg p-6">
           <form onSubmit={handleSupportSubmit}>
@@ -542,14 +541,13 @@ const Dashboard = () => {
                 {/* Name Field */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Your Name *</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter your full name" 
+                  <input
+                    type="text"
+                    placeholder="Enter your full name"
                     value={supportForm.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${
-                      supportErrors.name ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${supportErrors.name ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
+                      }`}
                   />
                   {supportErrors.name && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -564,14 +562,13 @@ const Dashboard = () => {
                 {/* Email Field */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Your Email *</label>
-                  <input 
-                    type="email" 
-                    placeholder="example@email.com" 
+                  <input
+                    type="email"
+                    placeholder="example@email.com"
                     value={supportForm.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${
-                      supportErrors.email ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${supportErrors.email ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
+                      }`}
                   />
                   {supportErrors.email && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -586,15 +583,14 @@ const Dashboard = () => {
                 {/* Phone Field */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    placeholder="10 digit mobile number" 
+                  <input
+                    type="tel"
+                    placeholder="10 digit mobile number"
                     value={supportForm.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     maxLength={10}
-                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${
-                      supportErrors.phone ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all ${supportErrors.phone ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
+                      }`}
                   />
                   {supportErrors.phone && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -611,18 +607,17 @@ const Dashboard = () => {
                 {/* Issue Field */}
                 <div className="flex-1">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Describe Your Issue * 
+                    Describe Your Issue *
                     <span className="text-xs text-gray-500 ml-2">({supportForm.issue.length}/500)</span>
                   </label>
-                  <textarea 
-                    placeholder="Please provide detailed information about your issue..." 
-                    rows="6" 
+                  <textarea
+                    placeholder="Please provide detailed information about your issue..."
+                    rows="6"
                     value={supportForm.issue}
                     onChange={(e) => handleInputChange('issue', e.target.value)}
                     maxLength={500}
-                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all resize-none ${
-                      supportErrors.issue ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-all resize-none ${supportErrors.issue ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
+                      }`}
                   />
                   {supportErrors.issue && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
@@ -646,7 +641,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                <button 
+                <button
                   type="submit"
                   disabled={supportLoading}
                   className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
@@ -691,7 +686,7 @@ const Dashboard = () => {
                 </svg>
                 <div>
                   <p className="text-xs text-gray-600">Phone</p>
-                  <p className="text-sm font-semibold text-gray-800">6200755759<br/>7393080847</p>
+                  <p className="text-sm font-semibold text-gray-800">6200755759<br />7393080847</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
@@ -715,8 +710,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Full-Width Header/Navbar at Top */}
-      <DashboardHeader 
-        toggleSidebar={toggleSidebar} 
+      <DashboardHeader
+        toggleSidebar={toggleSidebar}
         setActiveView={setActiveView}
         userData={userData}
       />
@@ -724,7 +719,7 @@ const Dashboard = () => {
       {/* Main Content Area with Sidebar */}
       <div className="flex relative">
         {/* Sidebar - Below Navbar */}
-        <DashboardSidebar 
+        <DashboardSidebar
           isOpen={isSidebarOpen}
           activeView={activeView}
           setActiveView={setActiveView}

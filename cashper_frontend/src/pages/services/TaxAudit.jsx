@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaFileInvoice, FaCalculator, FaCheckCircle, FaChartLine, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
@@ -25,13 +26,13 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
 
     const savedFormData = sessionStorage.getItem('tax_audit_form_data');
     const savedStep = sessionStorage.getItem('tax_audit_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -93,7 +94,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/tax-audit', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/tax-audit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -121,7 +122,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
   // Application Form Validation
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value.trim()) error = 'Full name is required';
         else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
@@ -250,11 +251,11 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
       toast.error('Please fix all errors before proceeding');
       return;
     }
-    
+
     // Only move to next step, don't submit
     if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
-      
+
       const formSection = document.getElementById('application-form-section');
       if (formSection) {
         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -264,7 +265,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -273,13 +274,13 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Only allow submission on step 4
     if (currentStep !== 4) {
       console.log('Form submission prevented - not on step 4');
       return;
     }
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('tax_audit_pending_step', '4');
       sessionStorage.setItem('tax_audit_form_data', JSON.stringify(applicationForm));
@@ -289,19 +290,19 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
       });
       return;
     }
-    
+
     // Validate ALL steps before submission
     let allErrors = {};
     for (let step = 1; step <= 4; step++) {
       const stepErrors = validateStep(step);
       allErrors = { ...allErrors, ...stepErrors };
     }
-    
+
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors);
       toast.error('Please fill all required fields in all steps before submitting');
       console.log('Validation errors:', allErrors);
-      
+
       // Navigate to first step with errors
       if (Object.keys(validateStep(1)).length > 0) {
         setCurrentStep(1);
@@ -312,15 +313,15 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
       } else if (Object.keys(validateStep(4)).length > 0) {
         setCurrentStep(4);
       }
-      
+
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       // Call API to submit tax audit application
       const response = await submitTaxAudit(applicationForm);
-      
+
       if (response.success) {
         setShowSuccessModal(true);
         toast.success('Tax audit application submitted successfully!');
@@ -371,10 +372,10 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                   ))}
                 </div>
 
-                <form onSubmit={(e) => { 
-                  e.preventDefault(); 
-                  if (currentStep === 4) { 
-                    handleApplicationSubmit(e); 
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (currentStep === 4) {
+                    handleApplicationSubmit(e);
                   } else {
                     console.log('Submit blocked - Current step:', currentStep);
                   }
@@ -412,7 +413,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                     <div className="space-y-5">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Document Uploads</h3>
                       <p className="text-sm text-gray-600 mb-4">Upload required documents (Max 5MB each, JPG/PNG/PDF only)</p>
-                      {[{name: 'balanceSheet', label: 'Balance Sheet *', required: true},{name: 'profitLoss', label: 'Profit & Loss Statement *', required: true},{name: 'bankStatements', label: 'Bank Statements *', required: true},{name: 'gstReturns', label: 'GST Returns', required: false},{name: 'panCard', label: 'PAN Card Copy *', required: true}].map(doc => (
+                      {[{ name: 'balanceSheet', label: 'Balance Sheet *', required: true }, { name: 'profitLoss', label: 'Profit & Loss Statement *', required: true }, { name: 'bankStatements', label: 'Bank Statements *', required: true }, { name: 'gstReturns', label: 'GST Returns', required: false }, { name: 'panCard', label: 'PAN Card Copy *', required: true }].map(doc => (
                         <div key={doc.name}>
                           <label className="block text-sm font-medium text-gray-700 mb-2">{doc.label}</label>
                           <div className={`border-2 border-dashed rounded-lg p-4 text-center hover:border-green-500 transition-colors ${errors[doc.name] ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}>
@@ -478,7 +479,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                 Professional tax audit services under Section 44AB. Expert Chartered Accountants ensure complete compliance and identify tax optimization opportunities.
               </p>
               <div className="pt-2">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -491,7 +492,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                 </button>
               </div>
             </div>
-            
+
             {/* Contact Form - Right Side */}
             <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -555,13 +556,13 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-gray-100">
             <div className="prose prose-lg max-w-none">
               <p className="text-gray-700 leading-relaxed mb-6">
-                Tax Audit under Section 44AB of the Income Tax Act is mandatory for businesses and professionals exceeding 
-                specified turnover limits. Our Chartered Accountants conduct thorough tax audits to ensure compliance and 
+                Tax Audit under Section 44AB of the Income Tax Act is mandatory for businesses and professionals exceeding
+                specified turnover limits. Our Chartered Accountants conduct thorough tax audits to ensure compliance and
                 identify opportunities for tax optimization.
               </p>
 
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Who Requires Tax Audit?</h2>
-              
+
               <div className="space-y-4">
                 <div className="bg-gradient-to-r from-green-50 to-teal-50 p-5 rounded-xl border border-green-100">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">For Businesses</h3>
@@ -695,10 +696,10 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                     ))}
                   </div>
 
-                  <form onSubmit={(e) => { 
-                    e.preventDefault(); 
-                    if (currentStep === 4) { 
-                      handleApplicationSubmit(e); 
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (currentStep === 4) {
+                      handleApplicationSubmit(e);
                     } else {
                       console.log('Submit blocked - Current step:', currentStep);
                     }
@@ -736,7 +737,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
                       <div className="space-y-5">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Document Uploads</h3>
                         <p className="text-sm text-gray-600 mb-4">Upload required documents (Max 5MB each, JPG/PNG/PDF only)</p>
-                        {[{name: 'balanceSheet', label: 'Balance Sheet *', required: true},{name: 'profitLoss', label: 'Profit & Loss Statement *', required: true},{name: 'bankStatements', label: 'Bank Statements *', required: true},{name: 'gstReturns', label: 'GST Returns', required: false},{name: 'panCard', label: 'PAN Card Copy *', required: true}].map(doc => (
+                        {[{ name: 'balanceSheet', label: 'Balance Sheet *', required: true }, { name: 'profitLoss', label: 'Profit & Loss Statement *', required: true }, { name: 'bankStatements', label: 'Bank Statements *', required: true }, { name: 'gstReturns', label: 'GST Returns', required: false }, { name: 'panCard', label: 'PAN Card Copy *', required: true }].map(doc => (
                           <div key={doc.name}>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{doc.label}</label>
                             <div className={`border-2 border-dashed rounded-lg p-4 text-center hover:border-green-500 transition-colors ${errors[doc.name] ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}>
@@ -777,7 +778,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
 
       {/* Rest of the page content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
-            {/* Features Section */}
+        {/* Features Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
             <FaFileInvoice className="text-4xl text-green-600 mb-4" />
@@ -832,7 +833,7 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
               </ul>
             </div>
           </div>
-          
+
           {/* Due Date Section */}
           <div className="mt-8 bg-white rounded-xl p-6 shadow-lg border-2 border-green-200">
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
@@ -860,17 +861,17 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl p-6 md:p-8">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 text-gray-800">Need Tax Audit Services?</h2>
-            <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
-              Get professional tax audit services from expert CAs. Ensure compliance and optimize your tax position.
-            </p>
-            <button
-              onClick={handleContactClick}
-              className="inline-block bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold px-8 md:px-12 py-4 md:py-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-base md:text-lg"
-            >
-              Contact Us Now →
-            </button>
-          </div>
+          <p className="text-gray-600 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
+            Get professional tax audit services from expert CAs. Ensure compliance and optimize your tax position.
+          </p>
+          <button
+            onClick={handleContactClick}
+            className="inline-block bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold px-8 md:px-12 py-4 md:py-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-base md:text-lg"
+          >
+            Contact Us Now →
+          </button>
         </div>
+      </div>
 
       {/* Contact Popup */}
       {showContactPopup && (
@@ -878,14 +879,14 @@ const TaxAudit = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

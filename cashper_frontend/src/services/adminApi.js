@@ -1,5 +1,6 @@
-import { API_ENDPOINTS } from '../config/api';
-const API_BASE_URL = API_ENDPOINTS.admin;
+import { API_BASE_URL as BASE_URL } from '../config/api.config';
+
+const API_BASE_URL = `${BASE_URL}/api/admin`;
 
 // Helper function to check if user is authenticated
 const isAuthenticated = () => {

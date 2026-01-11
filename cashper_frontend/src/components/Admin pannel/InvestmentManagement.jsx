@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, Wallet, PieChart, Eye, CheckCircle, XCircle, Download, Search, Clock } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api.config';
 
 const InvestmentManagement = () => {
   const [investments, setInvestments] = useState([]);
@@ -45,7 +46,7 @@ const InvestmentManagement = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://127.0.0.1:8000/api/admin/investments/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/investments/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -67,16 +68,16 @@ const InvestmentManagement = () => {
       const token = localStorage.getItem('access_token');
       // Fetch from both mutual funds and SIP APIs
       const [mutualFundsResponse, sipResponse] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/mutual-funds/application/all', {
+        fetch(`${API_BASE_URL}/api/mutual-funds/application/all`, {
           method: 'GET',
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }),
-        fetch('http://127.0.0.1:8000/api/sip/application/all', {
+        fetch(`${API_BASE_URL}/api/sip/application/all`, {
           method: 'GET',
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
@@ -85,7 +86,7 @@ const InvestmentManagement = () => {
 
       const mutualFundsData = await mutualFundsResponse.json();
       const sipData = await sipResponse.json();
-      
+
       // Transform mutual funds data
       const mutualFundsApplications = (mutualFundsData.applications || mutualFundsData.data || []).map(app => ({
         id: app._id || app.id,
@@ -95,8 +96,8 @@ const InvestmentManagement = () => {
         fundName: app.investmentType === 'sip' ? 'SIP Investment' : 'Mutual Fund',
         type: 'Mutual Funds',
         amount: app.investmentType === 'sip' ? `₹${app.sipAmount || 0}` : `₹${app.investmentAmount || 0}`,
-        totalInvested: app.investmentType === 'sip' 
-          ? `₹${(app.sipAmount * 12 * (app.tenure || 1) || 0).toLocaleString('en-IN')}` 
+        totalInvested: app.investmentType === 'sip'
+          ? `₹${(app.sipAmount * 12 * (app.tenure || 1) || 0).toLocaleString('en-IN')}`
           : `₹${app.investmentAmount || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
         returns: app.riskProfile === 'Low' ? '+8%' : app.riskProfile === 'Medium' ? '+10%' : '+12%',
         startDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
@@ -125,7 +126,7 @@ const InvestmentManagement = () => {
       // Combine both arrays
       const allInvestments = [...mutualFundsApplications, ...sipApplications];
       setInvestments(allInvestments);
-      
+
     } catch (error) {
       console.error('Error fetching investments:', error);
       setInvestments([]);
@@ -170,7 +171,7 @@ const InvestmentManagement = () => {
       Completed: 'bg-blue-100 text-blue-700 border-blue-300',
       Cancelled: 'bg-red-100 text-red-700 border-red-300'
     };
-    
+
     return (
       <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${styles[status] || styles.Active} flex items-center gap-1 w-fit`}>
         {status === 'Active' && <CheckCircle className="w-3 h-3" />}
@@ -191,7 +192,7 @@ const InvestmentManagement = () => {
     setLoadingDocuments(true);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://127.0.0.1:8000/api/admin/investments/${investmentId}/documents`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/investments/${investmentId}/documents`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -217,7 +218,7 @@ const InvestmentManagement = () => {
   const handleStatusUpdate = async (investmentId, newStatus) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/admin/investments/${investmentId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/investments/${investmentId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -225,9 +226,9 @@ const InvestmentManagement = () => {
         },
         body: JSON.stringify({ status: newStatus })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         // Update local state
         setInvestments(prevInv =>
@@ -281,10 +282,10 @@ const InvestmentManagement = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Create FormData to handle file uploads
       const formDataWithFiles = new FormData();
-      
+
       // Add regular fields
       formDataWithFiles.append('customer', formData.customer);
       formDataWithFiles.append('email', formData.email);
@@ -297,7 +298,7 @@ const InvestmentManagement = () => {
       formDataWithFiles.append('startDate', formData.startDate);
       formDataWithFiles.append('tenure', formData.tenure);
       formDataWithFiles.append('status', formData.status);
-      
+
       // Add files
       if (formData.documents && formData.documents.length > 0) {
         formData.documents.forEach((doc, index) => {
@@ -307,7 +308,7 @@ const InvestmentManagement = () => {
         });
       }
 
-      const response = await fetch('http://127.0.0.1:8000/api/admin/investments/create', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/investments/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -364,7 +365,7 @@ const InvestmentManagement = () => {
       inv.startDate,
       inv.tenure
     ]);
-    
+
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -383,15 +384,15 @@ const InvestmentManagement = () => {
         return;
       }
       const token = localStorage.getItem('access_token');
-      
+
       // Extract just the filename if it's a full path
       let filename = documentName;
       if (documentName.includes('/')) {
         filename = documentName.split('/').pop();
       }
       // Use the mutual-funds document download endpoint
-      const downloadUrl = `http://127.0.0.1:8000/api/mutual-funds/documents/download/${encodeURIComponent(filename)}`;
-      
+      const downloadUrl = `${API_BASE_URL}/api/mutual-funds/documents/download/${encodeURIComponent(filename)}`;
+
       const response = await fetch(downloadUrl, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -399,7 +400,7 @@ const InvestmentManagement = () => {
       if (response.ok) {
         // Get the blob
         const blob = await response.blob();
-        
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -429,7 +430,7 @@ const InvestmentManagement = () => {
           </h1>
           <p className="text-gray-600 mt-1">Manage Mutual Funds and SIP investments</p>
         </div>
-        <button 
+        <button
           onClick={exportInvestmentData}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-md"
         >
@@ -447,11 +448,10 @@ const InvestmentManagement = () => {
                 setFilterType('all');
                 setCurrentInvestmentPage(1);
               }}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${
-                filterType === 'all'
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${filterType === 'all'
                   ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <span className="text-lg">📋</span>
               <span className="text-sm sm:text-base">All Applications</span>
@@ -464,11 +464,10 @@ const InvestmentManagement = () => {
                 setFilterType('Mutual Funds');
                 setCurrentInvestmentPage(1);
               }}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${
-                filterType === 'Mutual Funds'
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${filterType === 'Mutual Funds'
                   ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <span className="text-lg">💰</span>
               <span className="text-sm sm:text-base">Mutual Funds</span>
@@ -481,11 +480,10 @@ const InvestmentManagement = () => {
                 setFilterType('SIP');
                 setCurrentInvestmentPage(1);
               }}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${
-                filterType === 'SIP'
+              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold transition-all ${filterType === 'SIP'
                   ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <span className="text-lg">📈</span>
               <span className="text-sm sm:text-base">SIP</span>
@@ -494,8 +492,8 @@ const InvestmentManagement = () => {
               </span>
             </button>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setShowInvestmentForm(!showInvestmentForm)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-md text-sm sm:text-base"
           >
@@ -509,7 +507,7 @@ const InvestmentManagement = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-green-500">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Add New Investment</h2>
-            <button 
+            <button
               onClick={() => setShowInvestmentForm(false)}
               className="text-gray-600 hover:text-red-600 text-2xl"
             >
@@ -772,7 +770,7 @@ const InvestmentManagement = () => {
                       </div>
                       <div>{getStatusBadge(investment.status)}</div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                       <div>
                         <p className="text-gray-500">Fund Name</p>
@@ -792,14 +790,14 @@ const InvestmentManagement = () => {
                       </div>
                     </div>
                     <div className="flex gap-2 pt-3 border-t border-gray-100">
-                      <button 
+                      <button
                         onClick={() => viewInvestmentDetails(investment)}
                         className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                       >
                         <Eye className="w-4 h-4" />
                         View
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleStatusUpdate(investment.id, 'Active')}
                         className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
                         disabled={investment.status === 'Active'}
@@ -807,7 +805,7 @@ const InvestmentManagement = () => {
                         <CheckCircle className="w-4 h-4" />
                         Approve
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleStatusUpdate(investment.id, 'Cancelled')}
                         className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                         disabled={investment.status === 'Cancelled'}
@@ -893,14 +891,14 @@ const InvestmentManagement = () => {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button 
+                          <button
                             onClick={() => viewInvestmentDetails(investment)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleStatusUpdate(investment.id, 'Active')}
                             className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Approve"
@@ -908,7 +906,7 @@ const InvestmentManagement = () => {
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleStatusUpdate(investment.id, 'Cancelled')}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Reject"
@@ -958,11 +956,10 @@ const InvestmentManagement = () => {
                         <button
                           key={pageNumber}
                           onClick={() => setCurrentInvestmentPage(pageNumber)}
-                          className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-                            currentInvestmentPage === pageNumber
+                          className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentInvestmentPage === pageNumber
                               ? 'bg-purple-600 text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                            }`}
                         >
                           {pageNumber}
                         </button>
@@ -986,18 +983,18 @@ const InvestmentManagement = () => {
       {showDetailsModal && selectedInvestment && (
         <>
           {/* Backdrop overlay - transparent to show page behind */}
-          <div 
+          <div
             className="fixed inset-0 bg-transparent z-40 flex items-center justify-center p-4"
             onClick={() => setShowDetailsModal(false)}
           >
             {/* Modal Container */}
-            <div 
+            <div
               className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden border-2 border-gray-300"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 flex justify-between items-center z-10">
                 <h2 className="text-xl font-bold">Investment Details</h2>
-                <button 
+                <button
                   onClick={() => setShowDetailsModal(false)}
                   className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
                 >
@@ -1095,7 +1092,7 @@ const InvestmentManagement = () => {
                                 <p className="text-xs text-gray-500">{doc.size || ''}</p>
                               </div>
                             </div>
-                            <button 
+                            <button
                               onClick={() => downloadDocument(selectedInvestment.id, doc.filename || doc.name)}
                               className="text-blue-600 hover:text-blue-700 hover:underline text-xs font-medium transition-colors flex items-center gap-1"
                             >
@@ -1115,7 +1112,7 @@ const InvestmentManagement = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-3 border-t">
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedInvestment.id, 'Active');
                       setShowDetailsModal(false);
@@ -1126,7 +1123,7 @@ const InvestmentManagement = () => {
                     <CheckCircle className="w-4 h-4" />
                     Approve
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedInvestment.id, 'Cancelled');
                       setShowDetailsModal(false);

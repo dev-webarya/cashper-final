@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Filter, Download, Plus, Eye, Edit, Trash2, Phone, Mail, Calendar, AlertCircle, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
-
-import { API_BASE_URL as CENTRAL_API_BASE_URL } from '../../config/api';
-const API_BASE_URL = CENTRAL_API_BASE_URL;
+import { API_BASE_URL } from '../../config/api.config';
 
 const InsuranceManagement = () => {
   const [filterType, setFilterType] = useState('all');
@@ -32,7 +30,7 @@ const InsuranceManagement = () => {
   // Fetch statistics
   const fetchStatistics = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/insurance-management/statistics`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/insurance-management/statistics`);
       if (response.ok) {
         const data = await response.json();
         setStatistics(data);
@@ -54,7 +52,7 @@ const InsuranceManagement = () => {
       params.append('skip', (policiesCurrentPage - 1) * itemsPerPage);
       params.append('limit', itemsPerPage);
 
-      const response = await fetch(`${API_BASE_URL}/admin/insurance-management/policies?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/insurance-management/policies?${params}`);
       if (response.ok) {
         const data = await response.json();
         setPolicies(data.policies);
@@ -87,7 +85,7 @@ const InsuranceManagement = () => {
 
   const handleStatusUpdate = async (policyId, newStatus) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/insurance-management/policies/${policyId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/insurance-management/policies/${policyId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +119,7 @@ const InsuranceManagement = () => {
 
       // Use the proper backend endpoint for document download
       // Endpoint: /admin/insurance-management/documents/download/{policy_id}/{document_path}
-      const downloadUrl = `${API_BASE_URL}/admin/insurance-management/documents/download/${policyId}/${encodedPath}`;
+      const downloadUrl = `${API_BASE_URL}/api/admin/insurance-management/documents/download/${policyId}/${encodedPath}`;
 
       console.log('Downloading from:', downloadUrl);
 
@@ -169,7 +167,7 @@ const InsuranceManagement = () => {
       if (filterType !== 'all') params.append('type', filterType);
       if (filterStatus !== 'all') params.append('status', filterStatus);
 
-      const response = await fetch(`${API_BASE_URL}/admin/insurance-management/policies/export/csv?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/insurance-management/policies/export/csv?${params}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -356,8 +354,8 @@ const InsuranceManagement = () => {
                 setPoliciesCurrentPage(1);
               }}
               className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 capitalize ${filterType === type
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               {type}
@@ -557,8 +555,8 @@ const InsuranceManagement = () => {
                 onClick={() => setPoliciesCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={policiesCurrentPage === 1}
                 className={`p-2 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
                   }`}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -577,8 +575,8 @@ const InsuranceManagement = () => {
                         key={pageNum}
                         onClick={() => setPoliciesCurrentPage(pageNum)}
                         className={`w-10 h-10 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === pageNum
-                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg transform scale-110'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg transform scale-110'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                       >
                         {pageNum}
@@ -598,8 +596,8 @@ const InsuranceManagement = () => {
                 onClick={() => setPoliciesCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={policiesCurrentPage === totalPages}
                 className={`p-2 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === totalPages
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
                   }`}
               >
                 <ChevronRight className="w-5 h-5" />

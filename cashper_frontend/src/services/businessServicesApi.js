@@ -1,8 +1,8 @@
 // Business Services API Integration
 import { getAuthToken } from './api';
+import { API_BASE_URL as BASE_URL } from '../config/api.config';
 
-import { API_ENDPOINTS } from '../config/api';
-const API_BASE_URL = API_ENDPOINTS.services.business;
+const API_BASE_URL = `${BASE_URL}/api/business-services`;
 
 // Helper function to make API requests with authentication
 const makeRequest = async (url, options = {}) => {

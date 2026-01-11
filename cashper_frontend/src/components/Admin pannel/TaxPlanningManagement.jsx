@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, FileText, TrendingUp, Eye, CheckCircle, XCircle, Clock, Filter, Search, Download, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api.config';
 
 // Helper function to format date properly
 const formatDate = (dateString) => {
@@ -24,7 +25,7 @@ const formatDate = (dateString) => {
 // Helper function to format income range with labels
 const formatIncomeRange = (incomeRange) => {
   if (!incomeRange) return 'N/A';
-  
+
   const incomeLabels = {
     // Personal Tax Ranges
     'below-5': '₹0 - ₹5 Lakhs',
@@ -40,14 +41,14 @@ const formatIncomeRange = (incomeRange) => {
     '10-50cr': '₹10-50 Cr',
     'above-50cr': '₹50+ Cr'
   };
-  
+
   return incomeLabels[incomeRange] || incomeRange;
 };
 
 // Helper function to calculate expected savings based on income range
 const calculateExpectedSavings = (incomeRange, type) => {
   if (!incomeRange) return '₹0 - ₹0';
-  
+
   const incomeRangeMap = {
     // Personal Tax Ranges
     'below-5': { min: 0, max: 500000 },
@@ -63,14 +64,14 @@ const calculateExpectedSavings = (incomeRange, type) => {
     '10-50cr': { min: 100000000, max: 500000000 },
     'above-50cr': { min: 500000000, max: 1000000000 }
   };
-  
+
   const range = incomeRangeMap[incomeRange];
   if (!range) return '₹0 - ₹0';
-  
+
   // Calculate savings (typically 15-30% depending on tax regime and deductions)
   const minSavings = Math.round(range.min * 0.15); // 15% savings
   const maxSavings = Math.round(range.max * 0.30); // 30% savings
-  
+
   return `₹${minSavings.toLocaleString('en-IN')} - ₹${maxSavings.toLocaleString('en-IN')}`;
 };
 
@@ -96,13 +97,13 @@ const TaxPlanningManagement = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Fetch from both personal and business tax endpoints
       const [personalResponse, businessResponse] = await Promise.all([
-        fetch('http://localhost:8000/api/personal-tax/application/all', {
+        fetch(`${API_BASE_URL}/api/personal-tax/application/all`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('http://localhost:8000/api/business-tax/application/all', {
+        fetch(`${API_BASE_URL}/api/business-tax/application/all`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -183,16 +184,16 @@ const TaxPlanningManagement = () => {
   };
   // Filter applications
   const filteredApplications = taxApplications.filter(application => {
-    const matchesSearch = 
+    const matchesSearch =
       (application?.applicantName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (application?.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (application?.planType || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || application?.status === filterStatus;
     const matchesPlanType = filterPlanType === 'all' || application?.planType === filterPlanType;
-    const matchesTab = activeTab === 'all' || 
+    const matchesTab = activeTab === 'all' ||
       (activeTab === 'personal' && application?.planType === 'Personal Tax Planning') ||
       (activeTab === 'business' && application?.planType === 'Business Tax Strategy');
-    
+
     return matchesSearch && matchesStatus && matchesPlanType && matchesTab;
   });
 
@@ -207,14 +208,14 @@ const TaxPlanningManagement = () => {
       approved: 'bg-green-100 text-green-700 border-green-300',
       rejected: 'bg-red-100 text-red-700 border-red-300'
     };
-    
+
     const icons = {
       pending: <Clock className="w-3 h-3" />,
       under_review: <AlertCircle className="w-3 h-3" />,
       approved: <CheckCircle className="w-3 h-3" />,
       rejected: <XCircle className="w-3 h-3" />
     };
-    
+
     return (
       <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${styles[status]} flex items-center gap-1 w-fit`}>
         {icons[status]} {status.toUpperCase().replace('_', ' ')}
@@ -225,17 +226,17 @@ const TaxPlanningManagement = () => {
   const handleStatusUpdate = async (applicationId, newStatus) => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Find the application to determine its type
       const application = taxApplications.find(app => app.id === applicationId || app._id === applicationId);
-      
+
       // Determine the correct endpoint based on planType
       let endpoint = 'personal-tax';
       if (application?.planType === 'Business Tax Strategy') {
         endpoint = 'business-tax';
       }
-      
-      const response = await fetch(`http://localhost:8000/api/${endpoint}/application/${applicationId}/status`, {
+
+      const response = await fetch(`${API_BASE_URL}/api/${endpoint}/application/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -285,7 +286,7 @@ const TaxPlanningManagement = () => {
       app.status,
       app.appliedDate
     ]);
-    
+
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -298,13 +299,13 @@ const TaxPlanningManagement = () => {
   const downloadDocument = async (applicationId, documentName) => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Try to download from backend first
       try {
-        const response = await fetch(`http://localhost:8000/uploads/documents/${documentName}`, {
+        const response = await fetch(`${API_BASE_URL}/uploads/documents/${documentName}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
@@ -320,7 +321,7 @@ const TaxPlanningManagement = () => {
       } catch (err) {
         console.log('Backend download failed, using mock data');
       }
-      
+
       // Fallback: Create a mock document for demonstration
       const content = `Tax Planning Application Document\n\nApplication ID: ${applicationId}\nDocument: ${documentName}\nDate: ${new Date().toLocaleDateString()}\n\nThis is a placeholder document for demonstration purposes.\nIn production, this would be the actual uploaded document.`;
       const blob = new Blob([content], { type: 'text/plain' });
@@ -333,7 +334,7 @@ const TaxPlanningManagement = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
     } catch (error) {
       console.error('Error downloading document:', error);
       alert('Failed to download document');
@@ -353,7 +354,7 @@ const TaxPlanningManagement = () => {
           </h1>
           <p className="text-gray-600 mt-1">View and manage tax planning applications</p>
         </div>
-        <button 
+        <button
           onClick={exportData}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-md"
         >
@@ -418,11 +419,10 @@ const TaxPlanningManagement = () => {
                 setActiveTab(tab.id);
                 setCurrentPage(1);
               }}
-              className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-1 sm:gap-2 ${
-                activeTab === tab.id
+              className={`px-3 sm:px-4 py-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-1 sm:gap-2 ${activeTab === tab.id
                   ? 'text-green-600 border-b-2 border-green-600'
                   : 'text-gray-600 hover:text-green-600'
-              }`}
+                }`}
             >
               <span className="text-sm sm:text-base">{tab.icon}</span>
               <span className="hidden sm:inline">{tab.label}</span>
@@ -520,7 +520,7 @@ const TaxPlanningManagement = () => {
                       <div className="mb-2">{getStatusBadge(application.status)}</div>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                     <div>
                       <p className="text-gray-500">Plan Type</p>
@@ -541,14 +541,14 @@ const TaxPlanningManagement = () => {
                   </div>
 
                   <div className="flex gap-2 pt-3 border-t border-gray-100">
-                    <button 
+                    <button
                       onClick={() => viewApplicationDetails(application)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       View
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleStatusUpdate(application.id, 'approved')}
                       disabled={application.status === 'approved'}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -556,7 +556,7 @@ const TaxPlanningManagement = () => {
                       <CheckCircle className="w-4 h-4" />
                       Approve
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleStatusUpdate(application.id, 'rejected')}
                       disabled={application.status === 'rejected'}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -629,8 +629,8 @@ const TaxPlanningManagement = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-900">{application.planType}</p>
                           <p className="text-xs text-gray-500">
-                            {application.planType === 'Personal Tax Planning' 
-                              ? application.taxRegime 
+                            {application.planType === 'Personal Tax Planning'
+                              ? application.taxRegime
                               : application.businessType}
                           </p>
                         </div>
@@ -654,14 +654,14 @@ const TaxPlanningManagement = () => {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button 
+                        <button
                           onClick={() => viewApplicationDetails(application)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStatusUpdate(application.id, 'approved')}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           title="Approve"
@@ -669,7 +669,7 @@ const TaxPlanningManagement = () => {
                         >
                           <CheckCircle className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStatusUpdate(application.id, 'rejected')}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Reject"
@@ -704,7 +704,7 @@ const TaxPlanningManagement = () => {
                   <span className="hidden sm:inline">Previous</span>
                   <span className="sm:hidden">Prev</span>
                 </button>
-                
+
                 {/* Page Numbers */}
                 <div className="flex gap-1">
                   {[...Array(Math.min(totalPages, 5))].map((_, index) => {
@@ -718,16 +718,15 @@ const TaxPlanningManagement = () => {
                     } else {
                       pageNumber = currentPage - 2 + index;
                     }
-                    
+
                     return (
                       <button
                         key={pageNumber}
                         onClick={() => setCurrentPage(pageNumber)}
-                        className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
-                          currentPage === pageNumber
+                        className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber
                             ? 'bg-green-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         {pageNumber}
                       </button>
@@ -750,24 +749,24 @@ const TaxPlanningManagement = () => {
 
       {/* Application Details Modal */}
       {showDetailsModal && selectedApplication && (
-        <div 
+        <div
           className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4"
           onClick={() => setShowDetailsModal(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto border-2 border-green-500 w-full max-w-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 flex justify-between items-center rounded-t-xl">
               <h2 className="text-2xl font-bold">Application Details</h2>
-              <button 
+              <button
                 onClick={() => setShowDetailsModal(false)}
                 className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
               >
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Applicant Information */}
               <div>
@@ -831,7 +830,7 @@ const TaxPlanningManagement = () => {
                           </div>
                           <span className="text-sm font-medium text-gray-900">{doc}</span>
                         </div>
-                        <button 
+                        <button
                           onClick={() => downloadDocument(selectedApplication.id, doc)}
                           className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors"
                         >
@@ -865,7 +864,7 @@ const TaxPlanningManagement = () => {
               {/* Action Buttons */}
               {selectedApplication.status === 'pending' && (
                 <div className="flex gap-3 pt-4 border-t">
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedApplication.id, 'under_review');
                       setShowDetailsModal(false);
@@ -875,7 +874,7 @@ const TaxPlanningManagement = () => {
                     <AlertCircle className="w-5 h-5" />
                     Move to Review
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedApplication.id, 'approved');
                       setShowDetailsModal(false);
@@ -885,7 +884,7 @@ const TaxPlanningManagement = () => {
                     <CheckCircle className="w-5 h-5" />
                     Approve
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedApplication.id, 'rejected');
                       setShowDetailsModal(false);
@@ -899,7 +898,7 @@ const TaxPlanningManagement = () => {
               )}
               {selectedApplication.status === 'under_review' && (
                 <div className="flex gap-3 pt-4 border-t">
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedApplication.id, 'approved');
                       setShowDetailsModal(false);
@@ -909,7 +908,7 @@ const TaxPlanningManagement = () => {
                     <CheckCircle className="w-5 h-5" />
                     Approve
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       handleStatusUpdate(selectedApplication.id, 'rejected');
                       setShowDetailsModal(false);

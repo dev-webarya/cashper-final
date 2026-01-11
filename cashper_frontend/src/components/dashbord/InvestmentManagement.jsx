@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, PieChart, DollarSign, Calendar, Target, Plus, 
+import {
+  TrendingUp, PieChart, DollarSign, Calendar, Target, Plus,
   X, Eye, Download, RefreshCw, Search, Filter, ArrowUpRight,
   ArrowDownRight, Activity, BarChart3, Zap, FileText, Shield, Home,
   Clock, Briefcase, Heart, Car
 } from 'lucide-react';
 import { getUserInvestments } from '../../services/dashboardApi';
 import HomeServiceFormPopup from './HomeServiceFormPopup';
+import { API_BASE_URL } from '../../config/api.config';
 
 const InvestmentManagement = () => {
   const [investments, setInvestments] = useState([]);
@@ -28,7 +29,7 @@ const InvestmentManagement = () => {
   const fetchInvestments = async () => {
     try {
       setLoading(true);
-      
+
       // Get user email from localStorage
       const user = localStorage.getItem('user');
       if (!user) {
@@ -36,10 +37,10 @@ const InvestmentManagement = () => {
         setInvestments([]);
         return;
       }
-      
+
       const userData = JSON.parse(user);
       const userEmail = userData.email || userData.emailAddress;
-      
+
       if (!userEmail) {
         console.log('User email not found');
         setInvestments([]);
@@ -50,20 +51,20 @@ const InvestmentManagement = () => {
 
       // Fetch mutual fund applications
       try {
-        const mfResponse = await fetch(`http://localhost:8000/api/mutual-funds/application/user/${encodeURIComponent(userEmail)}`);
-        
+        const mfResponse = await fetch(`${API_BASE_URL}/api/mutual-funds/application/user/${encodeURIComponent(userEmail)}`);
+
         if (mfResponse.ok) {
           const mfData = await mfResponse.json();
-          
+
           if (mfData.success && mfData.applications && mfData.applications.length > 0) {
             const transformedMF = mfData.applications.map((app, index) => ({
               id: app._id || app.id || `MF${String(index + 1).padStart(3, '0')}`,
               customer: app.name || 'N/A',
               name: app.investmentGoal || 'Mutual Fund Investment',
               type: 'Mutual Fund',
-              category: app.riskProfile === 'high' ? 'Equity' : 
-                       app.riskProfile === 'medium' ? 'Hybrid' : 
-                       app.riskProfile === 'low' ? 'Debt' : 'Hybrid',
+              category: app.riskProfile === 'high' ? 'Equity' :
+                app.riskProfile === 'medium' ? 'Hybrid' :
+                  app.riskProfile === 'low' ? 'Debt' : 'Hybrid',
               investmentType: app.investmentType || 'Lumpsum',
               investedAmount: app.investmentAmount || 0,
               currentValue: app.investmentAmount || 0,
@@ -80,10 +81,10 @@ const InvestmentManagement = () => {
               risk: app.riskProfile?.charAt(0).toUpperCase() + app.riskProfile?.slice(1) || 'Medium',
               status: (app.status || 'Pending').charAt(0).toUpperCase() + (app.status || 'Pending').slice(1),
               icon: TrendingUp,
-              color: app.riskProfile === 'high' ? 'from-green-600 to-emerald-600' : 
-                     app.riskProfile === 'low' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-indigo-600',
-              bgColor: app.riskProfile === 'high' ? 'bg-green-50' : 
-                       app.riskProfile === 'low' ? 'bg-blue-50' : 'bg-purple-50',
+              color: app.riskProfile === 'high' ? 'from-green-600 to-emerald-600' :
+                app.riskProfile === 'low' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-indigo-600',
+              bgColor: app.riskProfile === 'high' ? 'bg-green-50' :
+                app.riskProfile === 'low' ? 'bg-blue-50' : 'bg-purple-50',
               documents: app.documents || {},
               fullData: app
             }));
@@ -96,20 +97,20 @@ const InvestmentManagement = () => {
 
       // Fetch SIP applications
       try {
-        const sipResponse = await fetch(`http://localhost:8000/api/sip/application/user/${encodeURIComponent(userEmail)}`);
-        
+        const sipResponse = await fetch(`${API_BASE_URL}/api/sip/application/user/${encodeURIComponent(userEmail)}`);
+
         if (sipResponse.ok) {
           const sipData = await sipResponse.json();
-          
+
           if (sipData.success && sipData.applications && sipData.applications.length > 0) {
             const transformedSIP = sipData.applications.map((app, index) => ({
               id: app._id || app.id || `SIP${String(index + 1).padStart(3, '0')}`,
               customer: app.name || 'N/A',
               name: app.investmentGoal || 'SIP Investment',
               type: 'SIP',
-              category: app.riskProfile === 'aggressive' ? 'Equity' : 
-                       app.riskProfile === 'moderate' ? 'Hybrid' : 
-                       app.riskProfile === 'conservative' ? 'Debt' : 'Hybrid',
+              category: app.riskProfile === 'aggressive' ? 'Equity' :
+                app.riskProfile === 'moderate' ? 'Hybrid' :
+                  app.riskProfile === 'conservative' ? 'Debt' : 'Hybrid',
               investmentType: 'SIP',
               investedAmount: (app.sipAmount * app.tenure * 12) || 0,
               currentValue: (app.sipAmount * app.tenure * 12) || 0,
@@ -126,10 +127,10 @@ const InvestmentManagement = () => {
               risk: app.riskProfile?.charAt(0).toUpperCase() + app.riskProfile?.slice(1) || 'Moderate',
               status: (app.status || 'Pending').charAt(0).toUpperCase() + (app.status || 'Pending').slice(1),
               icon: TrendingUp,
-              color: app.riskProfile === 'aggressive' ? 'from-green-600 to-emerald-600' : 
-                     app.riskProfile === 'conservative' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-indigo-600',
-              bgColor: app.riskProfile === 'aggressive' ? 'bg-green-50' : 
-                       app.riskProfile === 'conservative' ? 'bg-blue-50' : 'bg-purple-50',
+              color: app.riskProfile === 'aggressive' ? 'from-green-600 to-emerald-600' :
+                app.riskProfile === 'conservative' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-indigo-600',
+              bgColor: app.riskProfile === 'aggressive' ? 'bg-green-50' :
+                app.riskProfile === 'conservative' ? 'bg-blue-50' : 'bg-purple-50',
               documents: app.documents || {},
               fullData: app
             }));
@@ -190,18 +191,18 @@ const InvestmentManagement = () => {
     .filter(inv => {
       // Status filter
       const statusMatch = statusFilter === 'all' || inv.status === statusFilter;
-      
+
       // Service type filter
       let serviceMatch = true;
       if (serviceFilter === 'all') serviceMatch = true;
       else if (serviceFilter === 'mutual funds') serviceMatch = inv.type === 'Mutual Fund';
       else if (serviceFilter === 'sip') serviceMatch = inv.investmentType === 'SIP';
-      
+
       // Search filter
       const searchMatch = inv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         inv.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
         inv.category.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       return statusMatch && serviceMatch && searchMatch;
     });
 
@@ -232,8 +233,8 @@ const InvestmentManagement = () => {
     totalReturns: investments.reduce((sum, i) => sum + i.returns, 0)
   };
 
-  const overallReturnsPercentage = investmentStats.totalInvested 
-    ? ((investmentStats.totalReturns / investmentStats.totalInvested) * 100).toFixed(2) 
+  const overallReturnsPercentage = investmentStats.totalInvested
+    ? ((investmentStats.totalReturns / investmentStats.totalInvested) * 100).toFixed(2)
     : 0;
 
   const handleViewDetails = (investment) => {
@@ -280,7 +281,7 @@ const InvestmentManagement = () => {
       
       Status: ${investment.status}
     `;
-    
+
     const blob = new Blob([statementContent], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -368,7 +369,7 @@ const InvestmentManagement = () => {
       </body>
       </html>
     `;
-    
+
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       newWindow.document.write(documentsHTML);
@@ -389,16 +390,16 @@ const InvestmentManagement = () => {
   const downloadDocument = async (documentPath) => {
     try {
       console.log('📥 Original document path:', documentPath);
-      
+
       // Extract filename from path
       const fileName = documentPath.split('/').pop().split('\\').pop();
-      
+
       // Normalize the path
       let normalizedPath = documentPath;
-      
+
       // Remove any leading/trailing slashes or backslashes
       normalizedPath = normalizedPath.replace(/^[\\\/]+|[\\\/]+$/g, '');
-      
+
       // Check if it's an absolute Windows path (contains drive letter)
       if (normalizedPath.match(/^[a-zA-Z]:\\/)) {
         // Extract only the relative path after 'uploads'
@@ -407,7 +408,7 @@ const InvestmentManagement = () => {
           normalizedPath = normalizedPath.substring(uploadsIndex);
         }
       }
-      
+
       // If path doesn't start with 'uploads', prepend it
       if (!normalizedPath.startsWith('uploads')) {
         // Check if it looks like a complete path with folder structure
@@ -418,37 +419,37 @@ const InvestmentManagement = () => {
           normalizedPath = 'uploads/documents/' + normalizedPath;
         }
       }
-      
+
       // Convert backslashes to forward slashes for URL
       normalizedPath = normalizedPath.replace(/\\/g, '/');
-      
+
       // Remove any double slashes
       normalizedPath = normalizedPath.replace(/\/+/g, '/');
-      
+
       // Construct download URL
-      const downloadUrl = `http://localhost:8000/${normalizedPath}`;
-      
+      const downloadUrl = `${API_BASE_URL}/${normalizedPath}`;
+
       console.log('📥 Normalized path:', normalizedPath);
       console.log('📥 Download URL:', downloadUrl);
       console.log('📥 File name:', fileName);
-      
+
       const token = localStorage.getItem('access_token');
       const response = await fetch(downloadUrl, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      
+
       console.log('📥 Response status:', response.status);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Download failed:', errorText);
         console.error('❌ Attempted URL:', downloadUrl);
         throw new Error(`Download failed with status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       console.log('📥 Blob size:', blob.size, 'bytes');
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -457,7 +458,7 @@ const InvestmentManagement = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       console.log('✅ Download successful:', fileName);
     } catch (error) {
       console.error('❌ Error downloading document:', error);
@@ -480,7 +481,7 @@ const InvestmentManagement = () => {
 
     return (
       <div className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
-        <div 
+        <div
           className="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-6 max-h-[85vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
@@ -541,12 +542,12 @@ const InvestmentManagement = () => {
                     'returns': 'Returns',
                     'returnsPercentage': 'Returns %'
                   };
-                  
+
                   return Object.entries(data)
-                    .filter(([key, value]) => 
-                      !excludeFields.includes(key) && 
-                      value !== null && 
-                      value !== undefined && 
+                    .filter(([key, value]) =>
+                      !excludeFields.includes(key) &&
+                      value !== null &&
+                      value !== undefined &&
                       value !== '' &&
                       typeof value !== 'object' &&
                       typeof value !== 'function'
@@ -569,7 +570,7 @@ const InvestmentManagement = () => {
             {(() => {
               const documents = investment.documents || {};
               const hasDocuments = documents && typeof documents === 'object' && Object.keys(documents).length > 0;
-              
+
               return hasDocuments ? (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -582,7 +583,7 @@ const InvestmentManagement = () => {
                         if (!docPath || typeof docPath !== 'string') return null;
                         const docName = docPath.split('\\').pop().split('/').pop();
                         const displayName = docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        
+
                         return (
                           <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg hover:bg-blue-50 transition-colors">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -594,7 +595,7 @@ const InvestmentManagement = () => {
                                 <span className="text-xs text-gray-500 block truncate">{docName}</span>
                               </div>
                             </div>
-                            <button 
+                            <button
                               onClick={() => downloadDocument(docPath)}
                               className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ml-2 flex-shrink-0"
                             >
@@ -637,7 +638,7 @@ const InvestmentManagement = () => {
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Track and manage your investment portfolio</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowInvestmentTypeModal(true)}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold shadow-md hover:shadow-lg text-sm sm:text-base"
         >
@@ -799,11 +800,10 @@ const InvestmentManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-8 h-8 text-xs rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-8 h-8 text-xs rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -935,11 +935,10 @@ const InvestmentManagement = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -974,7 +973,7 @@ const InvestmentManagement = () => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="mb-6">
               <h3 className="text-lg md:text-2xl font-bold text-gray-800 mb-2 pr-8">
                 Start New Investment
@@ -1017,9 +1016,9 @@ const InvestmentManagement = () => {
 
       {/* Home Service Form Popup */}
       {selectedServiceType && (
-        <HomeServiceFormPopup 
-          serviceType={selectedServiceType} 
-          onClose={() => setSelectedServiceType(null)} 
+        <HomeServiceFormPopup
+          serviceType={selectedServiceType}
+          onClose={() => setSelectedServiceType(null)}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaShieldAlt, FaCalendarCheck, FaFileAlt, FaClock, FaHandsHelping, FaCalculator, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome, FaBuilding, FaCalendarAlt } from 'react-icons/fa';
@@ -25,7 +26,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     // Check authentication
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
@@ -33,7 +34,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
     // Restore form data from sessionStorage after login redirect
     const savedFormData = sessionStorage.getItem('compliance_company_form_data');
     const savedStep = sessionStorage.getItem('compliance_company_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -95,7 +96,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/compliance-new-company', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/compliance-new-company`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -123,7 +124,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
   // Application Form Validation
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value.trim()) error = 'Full name is required';
         else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
@@ -253,7 +254,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
       return;
     }
     setCurrentStep(prev => prev + 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -262,7 +263,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -271,14 +272,14 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent submission if not on step 4
     if (currentStep < 4) {
       console.log('Form submission prevented - not on step 4');
       toast.warning('Please complete all steps before submitting');
       return;
     }
-    
+
     // Validate step 4 documents
     const stepErrors = validateStep(4);
     if (Object.keys(stepErrors).length > 0) {
@@ -286,7 +287,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
       toast.error('Please upload all required documents before submitting');
       return;
     }
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('compliance_company_pending_step', '4');
       sessionStorage.setItem('compliance_company_form_data', JSON.stringify(applicationForm));
@@ -301,7 +302,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
     try {
       // Call API to submit company compliance application
       const response = await submitCompanyCompliance(applicationForm);
-      
+
       if (response.success) {
         setShowSuccessModal(true);
         toast.success('Company compliance application submitted successfully!');
@@ -385,7 +386,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 4 && (
                     <div className="space-y-4">
                       <h3 className="text-lg font-bold text-gray-900">Upload Documents</h3>
-                      {[{name: 'cinCertificate', label: 'CIN Certificate *'}, {name: 'moa', label: 'MOA *'}, {name: 'aoa', label: 'AOA *'}, {name: 'directorPan', label: 'Director PAN *'}, {name: 'addressProof', label: 'Address Proof *'}].map(doc => (
+                      {[{ name: 'cinCertificate', label: 'CIN Certificate *' }, { name: 'moa', label: 'MOA *' }, { name: 'aoa', label: 'AOA *' }, { name: 'directorPan', label: 'Director PAN *' }, { name: 'addressProof', label: 'Address Proof *' }].map(doc => (
                         <div key={doc.name}>
                           <label className="block text-sm font-medium text-gray-700 mb-1">{doc.label}</label>
                           <div className={`border-2 border-dashed rounded-lg p-3 text-center hover:border-blue-500 transition-colors ${errors[doc.name] ? 'border-red-500' : 'border-gray-300'}`}>
@@ -404,26 +405,26 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
 
                   <div className="flex justify-between gap-3 pt-4">
                     {currentStep > 1 && (
-                      <button 
-                        type="button" 
-                        onClick={prevStep} 
+                      <button
+                        type="button"
+                        onClick={prevStep}
                         className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors"
                       >
                         ← Previous
                       </button>
                     )}
                     {currentStep < 4 ? (
-                      <button 
-                        type="button" 
-                        onClick={nextStep} 
+                      <button
+                        type="button"
+                        onClick={nextStep}
                         className="ml-auto px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium text-sm transition-all"
                       >
                         Next →
                       </button>
                     ) : (
-                      <button 
-                        type="submit" 
-                        disabled={isSubmitting} 
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
                         className="ml-auto px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium text-sm transition-all disabled:opacity-50"
                       >
                         {isSubmitting ? 'Submitting...' : 'Submit'}
@@ -454,7 +455,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
     <>
       <Navbar />
       <div className="w-full overflow-x-hidden bg-white">
-        
+
         {/* Hero Section */}
         <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
           style={{
@@ -475,7 +476,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                   Ensure your newly incorporated company stays compliant with all ROC, Income Tax, and GST regulations. Expert guidance from day one to avoid penalties and maintain good standing with authorities.
                 </p>
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => {
                       const element = document.getElementById('application-form-section');
                       if (element) {
@@ -488,7 +489,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Contact Form - Right Side */}
               <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -561,9 +562,9 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                 </p>
               </div>
               <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80" 
-                  alt="Company Compliance" 
+                <img
+                  src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80"
+                  alt="Company Compliance"
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -716,7 +717,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
               </div>
             </div>
             <div className="text-center mt-8">
-              <button 
+              <button
                 onClick={handleContactNavigation}
                 className="bg-white text-green-700 hover:bg-gray-100 font-bold px-8 md:px-12 py-3 md:py-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-base md:text-lg">
                 Get Compliance Support
@@ -768,11 +769,10 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                 <div className="flex justify-between items-center mb-8">
                   {[1, 2, 3, 4].map((step) => (
                     <div key={step} className="flex items-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                        currentStep === step ? 'bg-green-600 text-white' :
-                        currentStep > step ? 'bg-green-200 text-green-700' :
-                        'bg-gray-200 text-gray-500'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                          currentStep > step ? 'bg-green-200 text-green-700' :
+                            'bg-gray-200 text-gray-500'
+                        }`}>
                         {step}
                       </div>
                       {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -784,7 +784,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaUser className="mr-2 text-green-600" /> Full Name *
@@ -795,9 +795,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.fullName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('fullName')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter your full name"
                       />
                       {errors.fullName && (
@@ -817,9 +816,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.email}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('email')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="your.email@example.com"
                       />
                       {errors.email && (
@@ -839,9 +837,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.phone}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('phone')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="10-digit mobile number"
                       />
                       {errors.phone && (
@@ -861,9 +858,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.panNumber}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('panNumber')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                          errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="ABCDE1234F"
                         maxLength={10}
                       />
@@ -880,7 +876,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Company Details</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaBuilding className="mr-2 text-green-600" /> Company Name *
@@ -891,9 +887,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.companyName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('companyName')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.companyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter company name"
                       />
                       {errors.companyName && (
@@ -913,9 +908,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.cin}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('cin')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                          errors.cin ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.cin ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="L12345MH2020PTC123456"
                         maxLength={21}
                       />
@@ -936,9 +930,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.complianceType}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('complianceType')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.complianceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.complianceType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                       >
                         <option value="">Select Compliance Type</option>
                         <option value="Annual Filing (AOC-4 & MGT-7)">Annual Filing (AOC-4 & MGT-7)</option>
@@ -965,9 +958,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.registrationDate}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('registrationDate')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.registrationDate ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.registrationDate ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                       />
                       {errors.registrationDate && (
                         <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -982,7 +974,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                 {currentStep === 3 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Address Information</h3>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <FaHome className="mr-2 text-green-600" /> Complete Address *
@@ -993,9 +985,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('address')}
                         rows={3}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter complete address"
                       />
                       {errors.address && (
@@ -1016,9 +1007,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.city}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('city')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter city"
                         />
                         {errors.city && (
@@ -1038,9 +1028,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                           value={applicationForm.state}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('state')}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                            errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                          }`}
+                          className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                            }`}
                           placeholder="Enter state"
                         />
                         {errors.state && (
@@ -1061,9 +1050,8 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.pincode}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('pincode')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="6-digit pincode"
                         maxLength={6}
                       />
@@ -1081,7 +1069,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
                   <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Documents</h3>
                     <p className="text-sm text-gray-600 mb-4">All documents must be in JPG, PNG, or PDF format (max 5MB each)</p>
-                    
+
                     <div>
                       <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                         <Upload className="mr-2 text-green-600" /> CIN Certificate *
@@ -1239,7 +1227,7 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
             <p className="text-lg sm:text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
               Don't risk penalties. Let our experts handle all your company compliance requirements from day one!
             </p>
-            <button 
+            <button
               onClick={handleContactClick}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-10 py-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 text-lg"
             >
@@ -1256,14 +1244,14 @@ const ComplianceNewCompany = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

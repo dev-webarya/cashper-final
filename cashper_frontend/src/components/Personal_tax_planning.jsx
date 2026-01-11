@@ -469,7 +469,7 @@ const Personal_tax_planning = ({ isPopupMode = false, onPopupClose = null }) => 
             {/* Contact Form */}
             <div id="apply-form" className="bg-white rounded-lg xs:rounded-xl shadow-2xl p-3 xs:p-3.5 sm:p-4 md:p-5 mt-5 xs:mt-6 md:mt-0 mx-2 xs:mx-0">
               <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-2 xs:mb-3 sm:mb-4 text-center">
-                BOOK FREE TAX CONSULTATION
+                BOOK TAX CONSULTATION
               </h3>
               <form onSubmit={handleSubmit} className="space-y-1.5 xs:space-y-2 sm:space-y-3">
                 <input

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaBuilding, FaFileAlt, FaUsers, FaCertificate, FaHandshake, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
@@ -37,7 +38,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
     // Restore form data from sessionStorage after login redirect
     const savedFormData = sessionStorage.getItem('register_company_form_data');
     const savedStep = sessionStorage.getItem('register_company_pending_step');
-    
+
     if (savedFormData && token) {
       try {
         const parsedData = JSON.parse(savedFormData);
@@ -96,9 +97,9 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
     setIsSubmittingHero(true);
     try {
       console.log('Submitting hero form to API:', heroFormData);
-      
+
       // Submit to backend API
-      const response = await fetch('http://localhost:8000/api/corporate-inquiry/register-company', {
+      const response = await fetch(`${API_BASE_URL}/api/corporate-inquiry/register-company`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
       if (response.ok) {
         toast.success(data.message || 'Thank you! We will contact you soon.');
         console.log('Inquiry submitted successfully:', data);
-        
+
         // Reset form
         setHeroFormData({
           name: '',
@@ -140,7 +141,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
   // Application Form Validation
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value.trim()) error = 'Full name is required';
         else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
@@ -255,12 +256,12 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
       // Save form data and target step in sessionStorage
       sessionStorage.setItem('register_company_pending_step', '2');
       sessionStorage.setItem('register_company_form_data', JSON.stringify(applicationForm));
-      
+
       toast.warning('Please login to continue with your company registration', {
         position: 'top-center',
         autoClose: 3000
       });
-      
+
       navigate('/login?redirect=/services/register-company&step=2', {
         state: { from: '/services/register-company', returnStep: 2 }
       });
@@ -273,9 +274,9 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
       toast.error('Please fix all errors before proceeding');
       return;
     }
-    
+
     setCurrentStep(prev => prev + 1);
-    
+
     // Scroll to form section, not to top of page
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
@@ -285,7 +286,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
-    
+
     // Scroll to form section, not to top of page
     const formSection = document.getElementById('application-form-section');
     if (formSection) {
@@ -295,14 +296,14 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prevent submission if not on step 4
     if (currentStep < 4) {
       console.log('Form submission prevented - not on step 4');
       toast.warning('Please complete all steps before submitting');
       return;
     }
-    
+
     // Validate step 4 documents
     const stepErrors = validateStep(4);
     if (Object.keys(stepErrors).length > 0) {
@@ -310,7 +311,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
       toast.error('Please upload all required documents before submitting');
       return;
     }
-    
+
     // Final authentication check before submission
     if (!isAuthenticated) {
       sessionStorage.setItem('register_company_pending_step', '4');
@@ -326,7 +327,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
     try {
       // Call API to submit company registration
       const response = await submitCompanyRegistration(applicationForm);
-      
+
       if (response.success) {
         setShowSuccessModal(true);
         toast.success('Company registration application submitted successfully!');
@@ -411,7 +412,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                   {currentStep === 4 && (
                     <div className="space-y-4">
                       <h3 className="text-lg font-bold text-gray-900">Upload Documents</h3>
-                      {[{name: 'directorPan', label: 'Director PAN *'}, {name: 'addressProof', label: 'Address Proof *'}, {name: 'directorPhoto', label: 'Director Photo *'}, {name: 'moaDraft', label: 'MOA Draft *'}, {name: 'aoaDraft', label: 'AOA Draft *'}].map(doc => (
+                      {[{ name: 'directorPan', label: 'Director PAN *' }, { name: 'addressProof', label: 'Address Proof *' }, { name: 'directorPhoto', label: 'Director Photo *' }, { name: 'moaDraft', label: 'MOA Draft *' }, { name: 'aoaDraft', label: 'AOA Draft *' }].map(doc => (
                         <div key={doc.name}>
                           <label className="block text-sm font-medium text-gray-700 mb-1">{doc.label}</label>
                           <div className={`border-2 border-dashed rounded-lg p-3 text-center hover:border-green-500 transition-colors ${errors[doc.name] ? 'border-red-500' : 'border-gray-300'}`}>
@@ -430,26 +431,26 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
 
                   <div className="flex justify-between gap-3 pt-4">
                     {currentStep > 1 && (
-                      <button 
-                        type="button" 
-                        onClick={prevStep} 
+                      <button
+                        type="button"
+                        onClick={prevStep}
                         className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm transition-colors"
                       >
                         ← Previous
                       </button>
                     )}
                     {currentStep < 4 ? (
-                      <button 
-                        type="button" 
-                        onClick={nextStep} 
+                      <button
+                        type="button"
+                        onClick={nextStep}
                         className="ml-auto px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium text-sm transition-all"
                       >
                         Next →
                       </button>
                     ) : (
-                      <button 
-                        type="submit" 
-                        disabled={isSubmitting} 
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
                         className="ml-auto px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium text-sm transition-all disabled:opacity-50"
                       >
                         {isSubmitting ? 'Submitting...' : 'Submit'}
@@ -483,7 +484,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
       {/* Hero Section with Contact Form */}
       <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-16 sm:pb-20 md:pb-24 overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 z-0"
           style={{
             backgroundImage: 'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3")',
@@ -520,7 +521,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                 </div>
               </div>
               <div className="pt-4">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -539,7 +540,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
               <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur-sm">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Start Your Business Today</h3>
                 <p className="text-gray-600 mb-6 text-sm sm:text-base">Fill in your details and we'll get back to you</p>
-                
+
                 <form onSubmit={handleHeroFormSubmit} className="space-y-2 sm:space-y-3">
                   <input
                     type="text"
@@ -689,7 +690,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                 description: 'For large-scale businesses planning to raise capital from public. Can list on stock exchanges. Requires minimum 7 directors and 7 shareholders. Higher compliance requirements.'
               }
             ].map((type, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all border-t-4 border-green-600"
               >
@@ -825,11 +826,10 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
               <div className="flex justify-between items-center mb-8">
                 {[1, 2, 3, 4].map((step) => (
                   <div key={step} className="flex items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      currentStep === step ? 'bg-green-600 text-white' :
-                      currentStep > step ? 'bg-green-200 text-green-700' :
-                      'bg-gray-200 text-gray-500'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step ? 'bg-green-600 text-white' :
+                        currentStep > step ? 'bg-green-200 text-green-700' :
+                          'bg-gray-200 text-gray-500'
+                      }`}>
                       {step}
                     </div>
                     {step < 4 && <div className={`h-1 w-full ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />}
@@ -841,7 +841,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h3>
-                  
+
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                       <FaUser className="mr-2 text-green-600" /> Full Name *
@@ -852,9 +852,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.fullName}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('fullName')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.fullName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="Enter your full name"
                     />
                     {errors.fullName && (
@@ -874,9 +873,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.email}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('email')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="your.email@example.com"
                     />
                     {errors.email && (
@@ -896,9 +894,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.phone}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('phone')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="10-digit mobile number"
                     />
                     {errors.phone && (
@@ -918,9 +915,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.panNumber}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('panNumber')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${
-                        errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors uppercase ${errors.panNumber ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="ABCDE1234F"
                       maxLength={10}
                     />
@@ -937,7 +933,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-6">Company Details</h3>
-                  
+
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                       <FaBuilding className="mr-2 text-green-600" /> Proposed Company Name *
@@ -948,9 +944,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.proposedCompanyName}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('proposedCompanyName')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.proposedCompanyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.proposedCompanyName ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="Enter proposed company name"
                     />
                     {errors.proposedCompanyName && (
@@ -969,9 +964,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.companyType}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('companyType')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.companyType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.companyType ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                     >
                       <option value="">Select Company Type</option>
                       <option value="Private Limited Company">Private Limited Company</option>
@@ -998,9 +992,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.numberOfDirectors}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('numberOfDirectors')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.numberOfDirectors ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.numberOfDirectors ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="Enter number"
                       min="1"
                     />
@@ -1021,9 +1014,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.registrationState}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('registrationState')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.registrationState ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.registrationState ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="Enter state for registration"
                     />
                     {errors.registrationState && (
@@ -1039,7 +1031,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-6">Address Information</h3>
-                  
+
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                       <FaHome className="mr-2 text-green-600" /> Complete Address *
@@ -1050,9 +1042,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('address')}
                       rows={3}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.address ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="Enter complete address"
                     />
                     {errors.address && (
@@ -1073,9 +1064,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.city}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('city')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter city"
                       />
                       {errors.city && (
@@ -1095,9 +1085,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                         value={applicationForm.state}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('state')}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                          errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                        }`}
+                        className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.state ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                          }`}
                         placeholder="Enter state"
                       />
                       {errors.state && (
@@ -1118,9 +1107,8 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                       value={applicationForm.pincode}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('pincode')}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                        errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${errors.pincode ? 'border-red-500 focus:border-red-600' : 'border-gray-200 focus:border-green-500'
+                        }`}
                       placeholder="6-digit pincode"
                       maxLength={6}
                     />
@@ -1138,7 +1126,7 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-6">Upload Documents</h3>
                   <p className="text-sm text-gray-600 mb-4">All documents must be in JPG, PNG, or PDF format (max 5MB each)</p>
-                  
+
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
                       <Upload className="mr-2 text-green-600" /> Director PAN Card *
@@ -1311,14 +1299,14 @@ const RegisterCompany = ({ isPopupMode = false, onPopupClose }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

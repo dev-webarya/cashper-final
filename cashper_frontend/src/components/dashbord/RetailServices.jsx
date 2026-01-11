@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FileText, Calculator, CreditCard, TrendingUp, User, Users, 
+import {
+  FileText, Calculator, CreditCard, TrendingUp, User, Users,
   Home, Briefcase, Shield, DollarSign, Building, PiggyBank,
   ChevronRight, CheckCircle, Clock, ArrowRight, Phone, Mail,
   Calendar, Search, Filter, BookOpen, Wallet, Award, Target,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ServiceFormPopup from './ServiceFormPopup';
+import { API_BASE_URL } from '../../config/api.config';
 
 // Available retail services
 const RETAIL_SERVICES = [
@@ -64,7 +65,7 @@ const RetailServices = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-  
+
   // Applications data from backend
   const [applications, setApplications] = useState([
     {
@@ -91,7 +92,7 @@ const RetailServices = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('access_token');
-        
+
         if (!token) {
           console.error('No authentication token found');
           setLoading(false);
@@ -113,7 +114,7 @@ const RetailServices = () => {
           params.append('status', statusFilter);
         }
 
-        const url = `http://localhost:8000/api/user/retail-services/applications${params.toString() ? '?' + params.toString() : ''}`;
+        const url = `${API_BASE_URL}/api/user/retail-services/applications${params.toString() ? '?' + params.toString() : ''}`;
         console.log('🌐 Fetching applications from:', url);
 
         const response = await fetch(url, {
@@ -165,7 +166,7 @@ const RetailServices = () => {
   // Filter applications by search only (service and status filters are handled by backend)
   const filteredApplications = applications.filter(app => {
     if (searchQuery.trim() === '') return true;
-    
+
     const searchLower = searchQuery.toLowerCase();
     return (
       (app.applicantName && app.applicantName.toLowerCase().includes(searchLower)) ||
@@ -181,7 +182,7 @@ const RetailServices = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentApplications = filteredApplications.slice(indexOfFirstItem, indexOfLastItem);
-  
+
   // Auto-reset page when filtered results are less than current page
   React.useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
@@ -269,7 +270,7 @@ const RetailServices = () => {
     try {
       // Fetch full application details from backend
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/user/retail-services/applications/${app.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/retail-services/applications/${app.id}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -307,13 +308,13 @@ const RetailServices = () => {
   const downloadDocument = async (documentPath) => {
     try {
       console.log('📥 Original document path:', documentPath);
-      
+
       // Extract filename from path
       const fileName = documentPath.split('/').pop().split('\\').pop();
-      
+
       // Normalize the path
       let normalizedPath = documentPath;
-      
+
       // Check if it's an absolute Windows path
       if (documentPath.includes(':\\')) {
         // Extract only the relative path after 'uploads'
@@ -322,33 +323,33 @@ const RetailServices = () => {
           normalizedPath = documentPath.substring(uploadsIndex);
         }
       }
-      
+
       // Convert backslashes to forward slashes for URL
       normalizedPath = normalizedPath.replace(/\\/g, '/');
-      
+
       // Construct download URL
-      const downloadUrl = `http://localhost:8000/${normalizedPath}`;
-      
+      const downloadUrl = `${API_BASE_URL}/${normalizedPath}`;
+
       console.log('📥 Normalized path:', normalizedPath);
       console.log('📥 Download URL:', downloadUrl);
       console.log('📥 File name:', fileName);
-      
+
       const token = localStorage.getItem('access_token');
       const response = await fetch(downloadUrl, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      
+
       console.log('📥 Response status:', response.status);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Download failed:', errorText);
         throw new Error(`Download failed with status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       console.log('📥 Blob size:', blob.size, 'bytes');
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -357,7 +358,7 @@ const RetailServices = () => {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       console.log('✅ Download successful:', fileName);
     } catch (error) {
       console.error('❌ Error downloading document:', error);
@@ -409,7 +410,7 @@ const RetailServices = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl shadow-md border-l-4 border-yellow-600">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="w-full">
@@ -421,7 +422,7 @@ const RetailServices = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl shadow-md border-l-4 border-blue-600">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="w-full">
@@ -433,7 +434,7 @@ const RetailServices = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-3 sm:p-6 rounded-lg sm:rounded-xl shadow-md border-l-4 border-green-600">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="w-full">
@@ -464,7 +465,7 @@ const RetailServices = () => {
               className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
             />
           </div>
-          
+
           {/* Status Filter */}
           <select
             value={statusFilter}
@@ -481,7 +482,7 @@ const RetailServices = () => {
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
           </select>
-          
+
           {/* Service Filter */}
           <select
             value={serviceFilter}
@@ -504,53 +505,53 @@ const RetailServices = () => {
         {/* Mobile Card View */}
         <div className="block md:hidden">
           <div className="divide-y divide-gray-200">
-          {currentApplications.length === 0 ? (
-            <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
-              <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-lg sm:text-xl font-bold text-gray-600 mb-2">No Applications Found</h3>
-              <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria</p>
-            </div>
-          ) : (
-            currentApplications.map((app) => (
-              <div key={app.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-mono text-xs text-gray-500">{app.id}</p>
-                      <p className="font-semibold text-gray-800 mt-1">{app.applicantName}</p>
-                      <p className="text-xs text-gray-500">{app.applicantEmail}</p>
+            {currentApplications.length === 0 ? (
+              <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
+                <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold text-gray-600 mb-2">No Applications Found</h3>
+                <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria</p>
+              </div>
+            ) : (
+              currentApplications.map((app) => (
+                <div key={app.id} className="p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-mono text-xs text-gray-500">{app.id}</p>
+                        <p className="font-semibold text-gray-800 mt-1">{app.applicantName}</p>
+                        <p className="text-xs text-gray-500">{app.applicantEmail}</p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)}
+                        {app.status}
+                      </span>
                     </div>
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(app.status)}`}>
-                      {getStatusIcon(app.status)}
-                      {app.status}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <p className="text-gray-500">Service</p>
-                      <p className="font-medium text-gray-700">{app.serviceType}</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-gray-500">Service</p>
+                        <p className="font-medium text-gray-700">{app.serviceType}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Contact</p>
+                        <p className="font-medium text-gray-700">{app.contact}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-gray-500">Contact</p>
-                      <p className="font-medium text-gray-700">{app.contact}</p>
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">{app.appliedOn}</p>
+                      <button
+                        onClick={() => handleViewApplication(app)}
+                        className="flex items-center gap-1 px-3 py-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors font-medium text-xs"
+                      >
+                        <Eye className="w-3 h-3" />
+                        View
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <p className="text-xs text-gray-500">{app.appliedOn}</p>
-                    <button
-                      onClick={() => handleViewApplication(app)}
-                      className="flex items-center gap-1 px-3 py-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors font-medium text-xs"
-                    >
-                      <Eye className="w-3 h-3" />
-                      View
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
           </div>
-          
+
           {/* Mobile Pagination */}
           {filteredApplications.length > 0 && (
             <div className="p-4 border-t border-gray-200 bg-gray-50">
@@ -571,11 +572,10 @@ const RetailServices = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-8 h-8 text-xs sm:text-sm rounded-lg transition-colors ${
-                          currentPage === page
+                        className={`w-8 h-8 text-xs sm:text-sm rounded-lg transition-colors ${currentPage === page
                             ? 'bg-green-600 text-white'
                             : 'border border-gray-300 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -620,55 +620,55 @@ const RetailServices = () => {
             ) : (
               currentApplications.map((app) => (
                 <div key={app.id} className="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center gap-6 text-sm whitespace-nowrap">
-                  {/* ID */}
-                  <div className="w-40">
-                    <span className="font-mono text-gray-600 font-semibold truncate block">{app.id}</span>
-                  </div>
-                  
-                  {/* Applicant */}
-                  <div className="w-40">
-                    <p className="font-semibold text-gray-800 truncate">{app.applicantName}</p>
-                  </div>
-                  
-                  {/* Service Type */}
-                  <div className="w-44">
-                    <span className="text-gray-700 truncate block">{app.serviceType}</span>
-                  </div>
-                  
-                  {/* Contact */}
-                  <div className="w-32">
-                    <span className="text-gray-700 truncate block">{app.contact}</span>
-                  </div>
-                  
-                  {/* Applied On */}
-                  <div className="w-36">
-                    <span className="text-gray-600 text-xs truncate block">{app.appliedOn}</span>
-                  </div>
-                  
-                  {/* Status */}
-                  <div className="w-28">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(app.status)}`}>
-                      {getStatusIcon(app.status)}
-                      {app.status}
-                    </span>
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="w-20 flex justify-center flex-shrink-0">
-                    <button
-                      onClick={() => handleViewApplication(app)}
-                      className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                  <div className="flex items-center gap-6 text-sm whitespace-nowrap">
+                    {/* ID */}
+                    <div className="w-40">
+                      <span className="font-mono text-gray-600 font-semibold truncate block">{app.id}</span>
+                    </div>
+
+                    {/* Applicant */}
+                    <div className="w-40">
+                      <p className="font-semibold text-gray-800 truncate">{app.applicantName}</p>
+                    </div>
+
+                    {/* Service Type */}
+                    <div className="w-44">
+                      <span className="text-gray-700 truncate block">{app.serviceType}</span>
+                    </div>
+
+                    {/* Contact */}
+                    <div className="w-32">
+                      <span className="text-gray-700 truncate block">{app.contact}</span>
+                    </div>
+
+                    {/* Applied On */}
+                    <div className="w-36">
+                      <span className="text-gray-600 text-xs truncate block">{app.appliedOn}</span>
+                    </div>
+
+                    {/* Status */}
+                    <div className="w-28">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)}
+                        {app.status}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="w-20 flex justify-center flex-shrink-0">
+                      <button
+                        onClick={() => handleViewApplication(app)}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
           </div>
-          
+
           {/* Desktop Pagination */}
           {filteredApplications.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
@@ -689,11 +689,10 @@ const RetailServices = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${
-                          currentPage === page
+                        className={`w-10 h-10 text-sm rounded-lg transition-colors font-medium ${currentPage === page
                             ? 'bg-green-600 text-white shadow-md'
                             : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
@@ -800,12 +799,12 @@ const RetailServices = () => {
                       'original_itr_date': 'Original ITR Date',
                       'revision_reason': 'Revision Reason'
                     };
-                    
+
                     return Object.entries(data)
-                      .filter(([key, value]) => 
-                        !excludeFields.includes(key) && 
-                        value !== null && 
-                        value !== undefined && 
+                      .filter(([key, value]) =>
+                        !excludeFields.includes(key) &&
+                        value !== null &&
+                        value !== undefined &&
                         value !== '' &&
                         key !== 'fullData' &&
                         typeof value !== 'object'
@@ -829,7 +828,7 @@ const RetailServices = () => {
                 const data = selectedApplication.fullData || selectedApplication;
                 const documents = data.documents || {};
                 const hasDocuments = documents && typeof documents === 'object' && Object.keys(documents).length > 0;
-                
+
                 return hasDocuments ? (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -842,7 +841,7 @@ const RetailServices = () => {
                           if (!docPath || typeof docPath !== 'string') return null;
                           const docName = docPath.split('\\').pop().split('/').pop();
                           const displayName = docKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                          
+
                           return (
                             <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg hover:bg-teal-50 transition-colors">
                               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -854,7 +853,7 @@ const RetailServices = () => {
                                   <span className="text-xs text-gray-500 block truncate">{docName}</span>
                                 </div>
                               </div>
-                              <button 
+                              <button
                                 onClick={() => downloadDocument(docPath)}
                                 className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:bg-teal-100 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ml-2 flex-shrink-0"
                               >
@@ -884,7 +883,7 @@ const RetailServices = () => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="mb-6">
               <h3 className="text-lg md:text-2xl font-bold text-gray-800 mb-2 pr-8">
                 Select Retail Service

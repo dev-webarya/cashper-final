@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaChartLine, FaMobileAlt, FaShieldAlt, FaBolt, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome, FaCheckCircle } from 'react-icons/fa';
@@ -55,14 +56,14 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
     panNumber: '',
     aadhaarNumber: '',
     dateOfBirth: '',
-    
+
     // Step 2 - Account Details
     accountType: '',
     tradingSegments: [],
     annualIncome: '',
     occupationType: '',
     experienceLevel: '',
-    
+
     // Step 3 - Address & Bank Details
     address: '',
     city: '',
@@ -71,7 +72,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
     bankName: '',
     accountNumber: '',
     ifscCode: '',
-    
+
     // Step 4 - Documents
     panCard: null,
     aadhaarCard: null,
@@ -105,7 +106,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
 
     setIsSubmittingHero(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/online-trading-demat', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/online-trading-demat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -131,8 +132,8 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
   // Application Form Handlers
   const validateField = (name, value) => {
     let error = '';
-    
-    switch(name) {
+
+    switch (name) {
       case 'fullName':
         if (!value || value.trim().length < 3) error = 'Full name must be at least 3 characters';
         break;
@@ -194,25 +195,25 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
       default:
         break;
     }
-    
+
     return error;
   };
 
   const handleApplicationChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name === 'tradingSegments') {
       const updatedSegments = checked
         ? [...applicationForm.tradingSegments, value]
         : applicationForm.tradingSegments.filter(seg => seg !== value);
-      
+
       setApplicationForm(prev => ({
         ...prev,
         tradingSegments: updatedSegments
       }));
     } else {
       const fieldValue = type === 'checkbox' ? checked : value;
-      
+
       setApplicationForm(prev => ({
         ...prev,
         [name]: fieldValue
@@ -233,7 +234,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
       ...prev,
       [fieldName]: true
     }));
-    
+
     const error = validateField(fieldName, applicationForm[fieldName]);
     setErrors(prev => ({
       ...prev,
@@ -244,33 +245,33 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     const file = files[0];
-    
+
     if (file) {
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('File size must be less than 5MB');
         return;
       }
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Only JPG, PNG, and PDF files are allowed');
         return;
       }
-      
+
       setApplicationForm(prev => ({
         ...prev,
         [name]: file
       }));
-      
+
       toast.success(`${file.name} uploaded successfully`);
     }
   };
 
   const validateStep = (step) => {
     const stepErrors = {};
-    
+
     if (step === 1) {
       ['fullName', 'email', 'phone', 'panNumber', 'aadhaarNumber', 'dateOfBirth'].forEach(field => {
         const error = validateField(field, applicationForm[field]);
@@ -290,7 +291,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
         if (error) stepErrors[field] = error;
       });
     }
-    
+
     return stepErrors;
   };
 
@@ -302,13 +303,13 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
         position: 'top-center',
         autoClose: 3000
       });
-      navigate(`/login?redirect=/services/online-trading-demat&step=2`, { 
-        state: { from: '/services/online-trading-demat', returnStep: 2 } 
+      navigate(`/login?redirect=/services/online-trading-demat&step=2`, {
+        state: { from: '/services/online-trading-demat', returnStep: 2 }
       });
       return;
     }
     const stepErrors = validateStep(currentStep);
-    
+
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       Object.keys(stepErrors).forEach(field => {
@@ -317,7 +318,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
       toast.error('Please fix all errors before proceeding');
       return;
     }
-    
+
     setCurrentStep(prev => Math.min(prev + 1, 4));
   };
 
@@ -327,36 +328,36 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       sessionStorage.setItem('trading_demat_pending_step', '4');
       sessionStorage.setItem('trading_demat_form_data', JSON.stringify(applicationForm));
       toast.error('Please login to submit your application');
-      navigate('/login?redirect=/services/online-trading-demat&step=4', { 
-        state: { from: '/services/online-trading-demat', returnStep: 4 } 
+      navigate('/login?redirect=/services/online-trading-demat&step=4', {
+        state: { from: '/services/online-trading-demat', returnStep: 4 }
       });
       return;
     }
-    
+
     // Validate all required documents
     const requiredDocs = ['panCard', 'aadhaarCard', 'photo', 'signature', 'bankProof'];
     const missingDocs = requiredDocs.filter(doc => !applicationForm[doc]);
-    
+
     if (missingDocs.length > 0) {
       toast.error('Please upload all required documents');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       await submitTradingDematApplication(applicationForm);
-      
+
       toast.success('Trading & Demat Application submitted successfully!', {
         position: "top-center",
         autoClose: 3000
       });
-      
+
       // Reset form
       setApplicationForm({
         fullName: '',
@@ -421,7 +422,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
     <>
       {!isPopupMode && <Navbar />}
       <div className="w-full overflow-x-hidden bg-white">
-        
+
         {/* Hero Section */}
         {!isPopupMode && <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-6 sm:pb-8 md:pb-10 lg:pb-12 min-h-[500px] sm:min-h-[550px] md:min-h-[580px] lg:h-[600px] bg-cover bg-center bg-no-repeat text-white flex items-center"
           style={{
@@ -442,7 +443,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                   Start your investment journey with zero account opening charges. Trade in stocks, F&O, currency, and commodities with advanced tools and instant activation within 24 hours.
                 </p>
                 <div className="pt-2">
-                  <button 
+                  <button
                     onClick={() => {
                       const element = document.getElementById('apply-form');
                       if (element) {
@@ -455,7 +456,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                   </button>
                 </div>
               </div>
-              
+
               {/* Contact Form - Right Side */}
               <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-5 mt-6 md:mt-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">
@@ -585,11 +586,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
               <div className="flex justify-between items-center">
                 {[1, 2, 3, 4].map((step) => (
                   <div key={step} className="flex-1 flex flex-col items-center">
-                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${
-                      currentStep >= step
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${currentStep >= step
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-200 text-gray-500'
-                    }`}>
+                      }`}>
                       {step}
                     </div>
                     <div className="text-xs sm:text-sm mt-1 sm:mt-2 text-center font-medium">
@@ -599,9 +599,8 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       {step === 4 && 'Documents'}
                     </div>
                     {step < 4 && (
-                      <div className={`hidden sm:block absolute h-1 w-full top-5 left-1/2 -z-10 ${
-                        currentStep > step ? 'bg-green-600' : 'bg-gray-200'
-                      }`} style={{ width: 'calc(100% - 2.5rem)' }} />
+                      <div className={`hidden sm:block absolute h-1 w-full top-5 left-1/2 -z-10 ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'
+                        }`} style={{ width: 'calc(100% - 2.5rem)' }} />
                     )}
                   </div>
                 ))}
@@ -610,12 +609,12 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
 
             {/* Application Form */}
             <form onSubmit={handleApplicationSubmit} className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8">
-              
+
               {/* Step 1: Personal Information */}
               {currentStep === 1 && (
                 <div className="space-y-4 sm:space-y-5">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
-                  
+
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                       <FaUser className="inline mr-1.5 sm:mr-2 text-green-600" />
@@ -627,11 +626,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.fullName}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('fullName')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                        errors.fullName 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.fullName
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-600'
-                      }`}
+                        }`}
                       placeholder="Enter your full name"
                     />
                     {errors.fullName && (
@@ -653,11 +651,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.email}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('email')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.email 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.email
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="your.email@example.com"
                       />
                       {errors.email && (
@@ -678,11 +675,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.phone}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('phone')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.phone 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.phone
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="10-digit mobile number"
                       />
                       {errors.phone && (
@@ -705,11 +701,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.panNumber}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('panNumber')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm uppercase ${
-                          errors.panNumber 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm uppercase ${errors.panNumber
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="ABCDE1234F"
                         maxLength="10"
                       />
@@ -731,11 +726,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.aadhaarNumber}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('aadhaarNumber')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.aadhaarNumber 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.aadhaarNumber
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="12-digit Aadhaar"
                         maxLength="12"
                       />
@@ -757,11 +751,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.dateOfBirth}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('dateOfBirth')}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                        errors.dateOfBirth 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.dateOfBirth
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-600'
-                      }`}
+                        }`}
                     />
                     {errors.dateOfBirth && (
                       <p className="mt-1 text-xs sm:text-sm text-red-600 flex items-center">
@@ -776,7 +769,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
               {currentStep === 2 && (
                 <div className="space-y-4 sm:space-y-5">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Account Details</h3>
-                  
+
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                       Account Type *
@@ -786,11 +779,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.accountType}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('accountType')}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                        errors.accountType 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.accountType
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-600'
-                      }`}
+                        }`}
                     >
                       <option value="">Select account type</option>
                       <option value="individual">Individual</option>
@@ -840,11 +832,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.annualIncome}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('annualIncome')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.annualIncome 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.annualIncome
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                       >
                         <option value="">Select income range</option>
                         <option value="below-1L">Below ₹1 Lakh</option>
@@ -869,11 +860,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.occupationType}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('occupationType')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.occupationType 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.occupationType
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                       >
                         <option value="">Select occupation</option>
                         <option value="salaried">Salaried</option>
@@ -900,11 +890,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       value={applicationForm.experienceLevel}
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('experienceLevel')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                        errors.experienceLevel 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.experienceLevel
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-600'
-                      }`}
+                        }`}
                     >
                       <option value="">Select experience level</option>
                       <option value="beginner">Beginner (No experience)</option>
@@ -924,7 +913,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
               {currentStep === 3 && (
                 <div className="space-y-4 sm:space-y-5">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Bank & Address Details</h3>
-                  
+
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                       <FaHome className="inline mr-1.5 sm:mr-2 text-green-600" />
@@ -936,11 +925,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                       onChange={handleApplicationChange}
                       onBlur={() => handleBlur('address')}
                       rows="2"
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm resize-none ${
-                        errors.address 
-                          ? 'border-red-500 focus:border-red-600' 
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm resize-none ${errors.address
+                          ? 'border-red-500 focus:border-red-600'
                           : 'border-gray-200 focus:border-green-600'
-                      }`}
+                        }`}
                       placeholder="Enter full address"
                     />
                     {errors.address && (
@@ -962,11 +950,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.city}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('city')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.city 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.city
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="City"
                       />
                       {errors.city && (
@@ -986,11 +973,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.state}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('state')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.state 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.state
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="State"
                       />
                       {errors.state && (
@@ -1010,11 +996,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.pincode}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('pincode')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.pincode 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.pincode
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-green-600'
-                        }`}
+                          }`}
                         placeholder="6-digit pincode"
                         maxLength="6"
                       />
@@ -1028,7 +1013,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
 
                   <div className="border-t pt-4 mt-4">
                     <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Bank Details</h4>
-                    
+
                     <div>
                       <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                         Bank Name *
@@ -1039,11 +1024,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                         value={applicationForm.bankName}
                         onChange={handleApplicationChange}
                         onBlur={() => handleBlur('bankName')}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                          errors.bankName 
-                            ? 'border-red-500 focus:border-red-600' 
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.bankName
+                            ? 'border-red-500 focus:border-red-600'
                             : 'border-gray-200 focus:border-pink-500'
-                        }`}
+                          }`}
                         placeholder="Enter bank name"
                       />
                       {errors.bankName && (
@@ -1064,11 +1048,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.accountNumber}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('accountNumber')}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${
-                            errors.accountNumber 
-                              ? 'border-red-500 focus:border-red-600' 
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm ${errors.accountNumber
+                              ? 'border-red-500 focus:border-red-600'
                               : 'border-gray-200 focus:border-pink-500'
-                          }`}
+                            }`}
                           placeholder="Bank account number"
                         />
                         {errors.accountNumber && (
@@ -1088,11 +1071,10 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                           value={applicationForm.ifscCode}
                           onChange={handleApplicationChange}
                           onBlur={() => handleBlur('ifscCode')}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm uppercase ${
-                            errors.ifscCode 
-                              ? 'border-red-500 focus:border-red-600' 
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 rounded-lg outline-none transition-all text-xs sm:text-sm uppercase ${errors.ifscCode
+                              ? 'border-red-500 focus:border-red-600'
                               : 'border-gray-200 focus:border-pink-500'
-                          }`}
+                            }`}
                           placeholder="IFSC code"
                           maxLength="11"
                         />
@@ -1114,7 +1096,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                   <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Please upload clear copies of all required documents (JPG, PNG, or PDF, max 5MB each)
                   </p>
-                  
+
                   {[
                     { name: 'panCard', label: 'PAN Card', required: true },
                     { name: 'aadhaarCard', label: 'Aadhaar Card', required: true },
@@ -1169,12 +1151,12 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                   <button
                     type="button"
                     onClick={prevStep}
-                        className="px-4 sm:px-6 py-2 sm:py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all text-xs sm:text-sm"
+                    className="px-4 sm:px-6 py-2 sm:py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all text-xs sm:text-sm"
                   >
                     ← Previous
                   </button>
                 )}
-                
+
                 {currentStep < 4 ? (
                   <button
                     type="button"
@@ -1209,7 +1191,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                   Our support team is available 24/7 to assist you
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
                 <a href="tel:6200755759 , 7393080847" className="group flex items-center space-x-3 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 px-6 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto justify-center">
                   <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center group-hover:bg-green-700 transition-colors">
@@ -1220,7 +1202,7 @@ const OnlineTradingDemat = ({ isPopupMode = false, onPopupClose = null }) => {
                     <p className="text-base sm:text-lg font-bold text-gray-900">6200755759 , 7393080847</p>
                   </div>
                 </a>
-                
+
                 <a href="mailto:info@cashper.ai" className="group flex items-center space-x-3 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 px-6 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto justify-center">
                   <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center group-hover:bg-green-700 transition-colors">
                     <FaEnvelope className="text-white text-xl" />

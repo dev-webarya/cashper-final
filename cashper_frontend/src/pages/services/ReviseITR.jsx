@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '../../config/api.config';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaCheckCircle, FaFileAlt, FaCalculator, FaChartLine, FaPiggyBank, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaHome, FaCalendar } from 'react-icons/fa';
@@ -10,10 +11,10 @@ import { submitITRRevisionApplication } from '../../services/retailServicesApi';
 const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
   const navigate = useNavigate();
   const [showContactPopup, setShowContactPopup] = useState(false);
-  
+
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   const [heroFormData, setHeroFormData] = useState({
     name: '',
     email: '',
@@ -57,27 +58,27 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
   // useEffect for authentication check and form restoration
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     // Check if user is already logged in
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
-    
+
     // Check if returning from login with pending step
     const pendingStep = sessionStorage.getItem('revise_itr_pending_step');
     const savedFormData = sessionStorage.getItem('revise_itr_form_data');
-    
+
     console.log('Revise ITR Form - Checking restoration:', { token: !!token, pendingStep, hasFormData: !!savedFormData });
-    
+
     if (token && pendingStep && savedFormData) {
       try {
         const formData = JSON.parse(savedFormData);
         const step = parseInt(pendingStep);
-        
+
         console.log('Revise ITR Form - Restoring:', { step, formData });
-        
+
         setApplicationForm(formData);
         setCurrentStep(step);
-        
+
         // Use setTimeout to ensure state is set before showing toast
         setTimeout(() => {
           toast.success('Welcome back! Continuing your ITR revision application...', {
@@ -85,7 +86,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
             autoClose: 2000
           });
         }, 100);
-        
+
         // Clear session storage after restoration
         sessionStorage.removeItem('revise_itr_pending_step');
         sessionStorage.removeItem('revise_itr_form_data');
@@ -101,7 +102,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
 
   const validateField = (name, value) => {
     let error = '';
-    switch(name) {
+    switch (name) {
       case 'fullName':
         if (!value || value.trim().length < 3) error = 'Full name must be at least 3 characters';
         break;
@@ -226,12 +227,12 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
         autoClose: 3000
       });
       // Redirect to login with query parameters
-      navigate(`/login?redirect=/services/revise-itr&step=2`, { 
-        state: { from: '/services/revise-itr', returnStep: 2 } 
+      navigate(`/login?redirect=/services/revise-itr&step=2`, {
+        state: { from: '/services/revise-itr', returnStep: 2 }
       });
       return;
     }
-    
+
     // Validate all steps from 1 to current step
     for (let step = 1; step <= currentStep; step++) {
       const stepErrors = validateStep(step);
@@ -242,7 +243,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
         return;
       }
     }
-    
+
     setCurrentStep(prev => prev + 1);
     window.scrollTo({ top: document.getElementById('application-form-section')?.offsetTop - 100 || 0, behavior: 'smooth' });
   };
@@ -254,31 +255,31 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
 
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Check authentication
     if (!isAuthenticated) {
       sessionStorage.setItem('revise_itr_pending_step', '4');
       sessionStorage.setItem('revise_itr_form_data', JSON.stringify(applicationForm));
       toast.error('Please login to submit your application');
-      navigate('/login?redirect=/services/revise-itr&step=4', { 
-        state: { from: '/services/revise-itr', returnStep: 4 } 
+      navigate('/login?redirect=/services/revise-itr&step=4', {
+        state: { from: '/services/revise-itr', returnStep: 4 }
       });
       return;
     }
-    
+
     // Validate ALL 4 steps before submission
     const allErrors = {};
     for (let step = 1; step <= 4; step++) {
       const stepErrors = validateStep(step);
       Object.assign(allErrors, stepErrors);
     }
-    
+
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors);
       toast.error('Please complete all 4 steps with required information before submitting');
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       await submitITRRevisionApplication(applicationForm);
@@ -331,7 +332,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/applications/revise-itr', {
+      const response = await fetch(`${API_BASE_URL}/api/applications/revise-itr`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -365,7 +366,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
       {/* Hero Section with Contact Form */}
       {!isPopupMode && <section className="relative pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-16 sm:pb-20 md:pb-24 overflow-hidden">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 z-0"
           style={{
             backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3")',
@@ -402,7 +403,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
                 </div>
               </div>
               <div className="pt-4">
-                <button 
+                <button
                   onClick={() => {
                     const element = document.getElementById('application-form-section');
                     if (element) {
@@ -421,7 +422,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
               <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur-sm">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Revise Your Return Today</h3>
                 <p className="text-gray-600 mb-6 text-sm sm:text-base">Fill in your details and we'll get back to you</p>
-                
+
                 <form onSubmit={handleHeroFormSubmit} className="space-y-2 sm:space-y-3">
                   <input
                     type="text"
@@ -564,7 +565,7 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
                 description: 'Found mathematical errors or calculation mistakes in tax computation or total income calculation.'
               }
             ].map((item, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all border-t-4 border-green-600"
               >
@@ -697,9 +698,8 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
                   { num: 4, label: 'Documents' }
                 ].map((step) => (
                   <div key={step.num} className="flex flex-col items-center flex-1">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${
-                      currentStep >= step.num ? 'bg-green-600 text-white shadow-lg scale-110' : 'bg-gray-200 text-gray-500'
-                    }`}>{step.num}</div>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 ${currentStep >= step.num ? 'bg-green-600 text-white shadow-lg scale-110' : 'bg-gray-200 text-gray-500'
+                      }`}>{step.num}</div>
                     <span className={`mt-2 text-xs sm:text-sm font-medium text-center ${currentStep >= step.num ? 'text-green-600' : 'text-gray-400'}`}>{step.label}</span>
                   </div>
                 ))}
@@ -867,11 +867,10 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           {doc.label} {doc.required && <span className="text-red-500">*</span>}
                         </label>
-                        <div className={`relative border-2 border-dashed rounded-lg p-4 hover:border-green-500 transition-all cursor-pointer ${
-                          errors[doc.name] 
-                            ? 'border-red-500 bg-red-50' 
+                        <div className={`relative border-2 border-dashed rounded-lg p-4 hover:border-green-500 transition-all cursor-pointer ${errors[doc.name]
+                            ? 'border-red-500 bg-red-50'
                             : 'border-gray-300 bg-gray-50'
-                        }`}>
+                          }`}>
                           <input type="file" name={doc.name} onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                           <div className="text-center">
                             <Upload className={`w-8 h-8 mx-auto mb-2 ${errors[doc.name] ? 'text-red-400' : 'text-gray-400'}`} />
@@ -943,14 +942,14 @@ const ReviseITR = ({ isPopupMode = false, onPopupClose = null }) => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
-              <button 
+              <button
                 onClick={() => setShowContactPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all">
                 <div className="bg-green-600 p-3 rounded-full">

@@ -3,6 +3,7 @@ import { X, Upload, Check, AlertCircle, Lock, Shield, Trash2, Edit, Eye, EyeOff,
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser, updateUserProfile } from '../../services/api';
 import { toast } from 'react-toastify';
+import { API_BASE_URL, getAssetUrl } from '../../config/api.config';
 
 const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
     documentType: '',
@@ -35,7 +36,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
   const [uploadErrors, setUploadErrors] = useState({});
   const [profileImage, setProfileImage] = useState(null);
   const [documents, setDocuments] = useState([]);
-  
+
   const [userInfo, setUserInfo] = useState({
     name: '',
     email: '',
@@ -60,7 +61,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
           return;
         }
 
-        const response = await fetch('http://localhost:8000/api/auth/me', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -76,7 +77,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         }
 
         const data = await response.json();
-        
+
         // Update userInfo with actual backend data
         setUserInfo({
           name: data.fullName || '',
@@ -109,7 +110,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         }
 
         // Fetch user documents
-        const docsResponse = await fetch('http://localhost:8000/api/auth/documents', {
+        const docsResponse = await fetch(`${API_BASE_URL}/api/auth/documents`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -234,7 +235,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         occupation: userInfo.occupation,
         annualIncome: userInfo.annualIncome
       });
-      
+
       // Update local state with API response
       setUserInfo({
         name: updatedProfile.fullName,
@@ -247,7 +248,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         occupation: updatedProfile.occupation || '',
         annualIncome: updatedProfile.annualIncome || ''
       });
-      
+
       // Update parent userData
       if (setUserData) {
         const updatedUser = {
@@ -258,15 +259,15 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         };
         setUserData(updatedUser);
       }
-      
+
       setIsEditing(false);
       setErrors({});
-      
+
       toast.success('Profile updated successfully!', {
         position: "top-center",
         autoClose: 2000,
       });
-      
+
     } catch (error) {
       console.error('Failed to update profile:', error);
       toast.error(error.message || 'Failed to update profile', {
@@ -307,7 +308,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
     const hasLower = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
+
     return {
       minLength,
       hasUpper,
@@ -344,7 +345,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
 
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
-      
+
       // Simulate API call
       setTimeout(() => {
         setLoading(false);
@@ -411,7 +412,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
       if (!token) {
         throw new Error('Authentication required');
       }
-      const response = await fetch('http://localhost:8000/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -425,12 +426,12 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
       }
 
       const data = await response.json();
-      
+
       // Update local state with backend image URL
       if (data.profileImage) {
         console.log('Profile image uploaded successfully:', data.profileImage);
         setProfileImage(data.profileImage);
-        
+
         // Update parent component (Dashboard) with new profile image
         if (setUserData) {
           setUserData(prevData => ({
@@ -481,7 +482,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
 
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
-      
+
       try {
         const formData = new FormData();
         formData.append('file', uploadForm.file);
@@ -492,7 +493,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
           throw new Error('Authentication required');
         }
 
-        const response = await fetch('http://localhost:8000/api/auth/upload-document', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/upload-document`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -506,7 +507,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         }
 
         const data = await response.json();
-        
+
         // Add uploaded document to the list
         const newDoc = {
           id: data.id,
@@ -517,10 +518,10 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
           fileName: data.fileName,
           filePath: data.filePath
         };
-        
+
         const updatedDocuments = [...documents, newDoc];
         setDocuments(updatedDocuments);
-        
+
         setShowUploadModal(false);
         setUploadForm({ documentType: '', file: null, fileName: '' });
         setUploadErrors({});
@@ -543,7 +544,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
   const handleViewDocument = (doc) => {
     if (doc.filePath) {
       // Open the document from backend server
-      const fileUrl = `http://localhost:8000${doc.filePath}`;
+      const fileUrl = getAssetUrl(doc.filePath);
       window.open(fileUrl, '_blank');
     } else if (doc.fileData) {
       // Fallback for old localStorage-based documents
@@ -628,7 +629,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
       localStorage.removeItem('userProfile');
       localStorage.removeItem('authToken');
       localStorage.removeItem('uploadedDocuments');
-      
+
       alert('Your profile has been deleted. You will be redirected to the login page.');
       navigate('/login');
     }
@@ -671,7 +672,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                         const token = localStorage.getItem('access_token');
                         if (!token) return;
 
-                        const response = await fetch('http://localhost:8000/api/auth/me', {
+                        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
                           method: 'GET',
                           headers: {
                             'Authorization': `Bearer ${token}`,
@@ -748,14 +749,14 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
         {/* Profile Info */}
         <div className="px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div 
+            <div
               className={`w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-green-600 via-green-700 to-green-800 rounded-full flex items-center justify-center text-white text-3xl sm:text-4xl font-bold shadow-xl border-4 border-white relative group overflow-hidden ${isEditing ? 'cursor-pointer' : ''}`}
               onClick={triggerProfileImageUpload}
             >
               {profileImage ? (
-                <img 
-                  src={profileImage.startsWith('http') ? profileImage : `http://localhost:8000${profileImage}`} 
-                  alt="Profile" 
+                <img
+                  src={getAssetUrl(profileImage)}
+                  alt="Profile"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error('Image failed to load:', profileImage);
@@ -805,9 +806,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   value={userInfo.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.name ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.name ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="Enter your full name"
                 />
                 {errors.name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.name}</p>}
@@ -842,9 +842,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   }}
                   disabled={!isEditing}
                   maxLength={10}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.phone ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.phone ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="9876543210"
                 />
                 {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.phone}</p>}
@@ -859,9 +858,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                   disabled={!isEditing}
                   max={new Date().toISOString().split('T')[0]}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.dateOfBirth ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.dateOfBirth ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                 />
                 {errors.dateOfBirth && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.dateOfBirth}</p>}
               </div>
@@ -874,9 +872,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   value={userInfo.occupation}
                   onChange={(e) => handleInputChange('occupation', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.occupation ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.occupation ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="Enter your occupation"
                 />
                 {errors.occupation && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.occupation}</p>}
@@ -892,9 +889,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   disabled={!isEditing}
                   rows="3"
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.address ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none resize-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.address ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none resize-none`}
                   placeholder="Enter your complete address"
                 />
                 {errors.address && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.address}</p>}
@@ -909,9 +905,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   onChange={(e) => handleInputChange('panCard', e.target.value.toUpperCase())}
                   disabled={!isEditing}
                   maxLength={10}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 uppercase ${
-                    errors.panCard ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 uppercase ${errors.panCard ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="ABCDE1234F"
                 />
                 {errors.panCard && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.panCard}</p>}
@@ -929,9 +924,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   }}
                   disabled={!isEditing}
                   maxLength={17}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.aadhar ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.aadhar ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="XXXX-XXXX-XXXX"
                 />
                 {errors.aadhar && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.aadhar}</p>}
@@ -945,9 +939,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   value={isEditing ? userInfo.annualIncome : formatCurrency(userInfo.annualIncome)}
                   onChange={(e) => handleInputChange('annualIncome', e.target.value.replace(/[^0-9]/g, ''))}
                   disabled={!isEditing}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    errors.annualIncome ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
-                  } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${errors.annualIncome ? 'border-red-500' : isEditing ? 'border-gray-300 focus:border-green-500' : 'border-gray-200 bg-gray-50'
+                    } focus:ring-2 focus:ring-green-200 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed focus:outline-none`}
                   placeholder="1200000"
                 />
                 {errors.annualIncome && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.annualIncome}</p>}
@@ -973,7 +966,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 Once you delete your profile, there is no going back. All your data, documents, and history will be permanently deleted.
               </p>
             </div>
-            <button 
+            <button
               onClick={() => setShowDeleteModal(true)}
               className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 whitespace-nowrap"
             >
@@ -998,7 +991,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
                 <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1008,7 +1001,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 <p className="text-xs sm:text-sm text-gray-500">Update your account password</p>
               </div>
             </div>
-            
+
             <div className="space-y-3 sm:space-y-4">
               {/* Current Password */}
               <div>
@@ -1021,9 +1014,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                       setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }));
                       setPasswordErrors(prev => ({ ...prev, currentPassword: '' }));
                     }}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${
-                      passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'
-                    } focus:border-green-500 focus:outline-none transition-all`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                      } focus:border-green-500 focus:outline-none transition-all`}
                     placeholder="Enter current password"
                   />
                   <button
@@ -1040,7 +1032,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   </p>
                 )}
               </div>
-              
+
               {/* New Password */}
               <div>
                 <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 block">New Password *</label>
@@ -1052,9 +1044,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                       setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }));
                       setPasswordErrors(prev => ({ ...prev, newPassword: '' }));
                     }}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${
-                      passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'
-                    } focus:border-green-500 focus:outline-none transition-all`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'
+                      } focus:border-green-500 focus:outline-none transition-all`}
                     placeholder="Enter new password"
                   />
                   <button
@@ -1082,9 +1073,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                         { test: /[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword), label: 'One special character' }
                       ].map((req, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 text-[10px] sm:text-xs">
-                          <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${
-                            req.test ? 'bg-green-500' : 'bg-gray-300'
-                          }`}>
+                          <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${req.test ? 'bg-green-500' : 'bg-gray-300'
+                            }`}>
                             {req.test && <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />}
                           </div>
                           <span className={req.test ? 'text-green-700' : 'text-gray-600'}>{req.label}</span>
@@ -1094,7 +1084,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   </div>
                 )}
               </div>
-              
+
               {/* Confirm Password */}
               <div>
                 <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 block">Confirm New Password *</label>
@@ -1106,9 +1096,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                       setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }));
                       setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
                     }}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${
-                      passwordErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    } focus:border-green-500 focus:outline-none transition-all`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-sm sm:text-base rounded-lg border-2 ${passwordErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                      } focus:border-green-500 focus:outline-none transition-all`}
                     placeholder="Confirm new password"
                   />
                   <button
@@ -1126,9 +1115,9 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 )}
               </div>
             </div>
-            
+
             <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button 
+              <button
                 onClick={() => {
                   setShowPasswordModal(false);
                   setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -1139,7 +1128,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handlePasswordChange}
                 disabled={loading}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -1168,10 +1157,10 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
             >
               <X className="w-6 h-6" />
             </button>
-            
+
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Enable Two-Factor Authentication</h3>
             <p className="text-gray-600 mb-6">Add an extra layer of security to your account</p>
-            
+
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-900 mb-2">How it works:</p>
@@ -1181,7 +1170,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   <li>Enter the 6-digit code to verify</li>
                 </ul>
               </div>
-              
+
               <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-center">
                 <div className="text-center">
                   <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center mb-3">
@@ -1190,7 +1179,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   <p className="text-xs text-gray-600 font-mono">ABCD-EFGH-IJKL-MNOP</p>
                 </div>
               </div>
-              
+
               <div>
                 <label className="text-sm font-semibold text-gray-700 mb-2 block">Verification Code</label>
                 <input
@@ -1201,8 +1190,8 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 />
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => {
                 alert('Two-Factor Authentication enabled successfully!');
                 setShow2FAModal(false);
@@ -1229,7 +1218,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
                 <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1239,20 +1228,19 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 <p className="text-xs sm:text-sm text-gray-500">Add a new document</p>
               </div>
             </div>
-            
+
             <div className="space-y-3 sm:space-y-4">
               {/* Document Type */}
               <div>
                 <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 block">Document Type *</label>
-                <select 
+                <select
                   value={uploadForm.documentType}
                   onChange={(e) => {
                     setUploadForm(prev => ({ ...prev, documentType: e.target.value }));
                     setUploadErrors(prev => ({ ...prev, documentType: '' }));
                   }}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
-                    uploadErrors.documentType ? 'border-red-500' : 'border-gray-300'
-                  } focus:border-green-500 focus:outline-none transition-all`}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${uploadErrors.documentType ? 'border-red-500' : 'border-gray-300'
+                    } focus:border-green-500 focus:outline-none transition-all`}
                 >
                   <option value="">Select document type</option>
                   <option value="pan">PAN Card</option>
@@ -1268,7 +1256,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   </p>
                 )}
               </div>
-              
+
               {/* File Upload */}
               <div>
                 <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 block">Upload File *</label>
@@ -1281,11 +1269,9 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 />
                 <label
                   htmlFor="fileUpload"
-                  className={`block border-2 border-dashed ${
-                    uploadErrors.file ? 'border-red-500' : 'border-gray-300 hover:border-green-500'
-                  } rounded-lg p-6 sm:p-8 text-center transition-all cursor-pointer ${
-                    uploadForm.fileName ? 'bg-green-50 border-green-500' : 'bg-gray-50'
-                  }`}
+                  className={`block border-2 border-dashed ${uploadErrors.file ? 'border-red-500' : 'border-gray-300 hover:border-green-500'
+                    } rounded-lg p-6 sm:p-8 text-center transition-all cursor-pointer ${uploadForm.fileName ? 'bg-green-50 border-green-500' : 'bg-gray-50'
+                    }`}
                 >
                   {uploadForm.fileName ? (
                     <>
@@ -1315,9 +1301,9 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button 
+              <button
                 onClick={() => {
                   setShowUploadModal(false);
                   setUploadForm({ documentType: '', file: null, fileName: '' });
@@ -1328,7 +1314,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleUploadDocument}
                 disabled={loading}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -1357,7 +1343,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
             >
               <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            
+
             <div className="text-center mb-4 sm:mb-6">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Trash2 className="w-7 h-7 sm:w-8 sm:h-8 text-red-600" />
@@ -1365,7 +1351,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Delete Profile?</h3>
               <p className="text-sm sm:text-base text-gray-600">This action cannot be undone</p>
             </div>
-            
+
             <div className="space-y-3 sm:space-y-4">
               <div className="p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
                 <p className="text-xs sm:text-sm text-red-900 mb-1.5 sm:mb-2 font-semibold">⚠️ Warning: This will permanently delete:</p>
@@ -1377,7 +1363,7 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                   <li>All saved preferences and settings</li>
                 </ul>
               </div>
-              
+
               <div>
                 <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 block">
                   Type <span className="text-red-600 font-bold">DELETE</span> to confirm *
@@ -1396,15 +1382,15 @@ const UserProfile = ({ userData, setUserData, showEditButton = false }) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button 
+              <button
                 onClick={() => setShowDeleteModal(false)}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg sm:rounded-xl font-semibold transition-all text-sm sm:text-base"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={() => {
                   const input = document.getElementById('deleteConfirmation');
                   if (input.value === 'DELETE') {
