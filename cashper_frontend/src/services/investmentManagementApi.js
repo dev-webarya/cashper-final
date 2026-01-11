@@ -1,6 +1,7 @@
 import { apiRequest, getAuthToken } from './api';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/investment-management';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.investments.management;
 
 /**
  * Get portfolio summary including total invested, current value, and returns

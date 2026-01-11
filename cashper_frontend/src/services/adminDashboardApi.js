@@ -3,7 +3,8 @@
  * Handles all API calls for admin dashboard with real-time data
  */
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/admin';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.admin;
 
 // ==================== DASHBOARD STATS ====================
 

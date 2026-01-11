@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { API_ROOT } from '../../config/api';
+const API_BASE_URL = API_ROOT;
 
 const ReportsAnalytics = () => {
   const [dateRange, setDateRange] = useState('30days');
@@ -12,7 +13,7 @@ const ReportsAnalytics = () => {
   const [downloadingReports, setDownloadingReports] = useState({});
   const [refreshInterval, setRefreshInterval] = useState(30);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
-  
+
   // State for API data
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loanDistribution, setLoanDistribution] = useState(null);
@@ -416,7 +417,7 @@ const ReportsAnalytics = () => {
 
   const downloadFile = (reportName, format = 'pdf') => {
     let fileName = reportName.replace(/\s+/g, '_').toLowerCase();
-    
+
     if (format === 'csv') {
       const content = generateCSVContent();
       const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
@@ -534,8 +535,8 @@ const ReportsAnalytics = () => {
 
   // Use actual API data or fallback to defaults
   const displayReportCategories = reportCategories && reportCategories.length > 0 ? reportCategories : [
-    { 
-      name: 'Loan Reports', 
+    {
+      name: 'Loan Reports',
       gradient: 'from-green-600 to-green-700',
       reports: ['Short-Term Loan Report', 'Personal Loan Report', 'Home Loan Report', 'Business Loan Report']
     },
@@ -581,9 +582,9 @@ const ReportsAnalytics = () => {
               </p>
             )}
           </div>
-          
+
           <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
-            <button 
+            <button
               onClick={() => {
                 setLoading(true);
                 setTimeout(() => {
@@ -614,7 +615,7 @@ const ReportsAnalytics = () => {
                 </>
               )}
             </button>
-            <button 
+            <button
               onClick={handleExportAll}
               disabled={isExporting || loading}
               className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
@@ -648,7 +649,7 @@ const ReportsAnalytics = () => {
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
-        
+
       </div>
 
       {/* Report Categories */}

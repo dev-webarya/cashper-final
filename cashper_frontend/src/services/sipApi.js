@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getAuthToken } from './api';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/sip';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.investments.sip;
 
 // ===================== Contact/Inquiry APIs =====================
 

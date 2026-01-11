@@ -1,7 +1,8 @@
 // Personal Loan API Service
 import { getAuthToken } from './api';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/personal-loan';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.loans.personal;
 
 // Helper function to make API requests with optional authentication
 const makeRequest = async (url, options = {}) => {

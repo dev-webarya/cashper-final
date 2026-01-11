@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/settings';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.settings;
 
 // Get authorization headers
 const getAuthHeaders = () => {

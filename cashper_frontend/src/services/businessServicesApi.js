@@ -1,12 +1,13 @@
 // Business Services API Integration
 import { getAuthToken } from './api';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/business-services';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.services.business;
 
 // Helper function to make API requests with authentication
 const makeRequest = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   const headers = {
     ...options.headers,
   };
@@ -42,7 +43,7 @@ const makeRequest = async (url, options = {}) => {
         });
         return { success: false, error: 'Validation failed', fieldErrors };
       }
-      
+
       throw new Error(data.detail || 'Something went wrong');
     }
 
@@ -62,7 +63,7 @@ const makeRequest = async (url, options = {}) => {
  */
 export const submitCompanyRegistration = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields - convert camelCase to snake_case
   formDataObj.append('full_name', formData.fullName || '');
   formDataObj.append('email', formData.email || '');
@@ -112,7 +113,7 @@ export const getCompanyRegistrations = async (params = {}) => {
  */
 export const submitCompanyCompliance = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields - convert camelCase to snake_case
   formDataObj.append('full_name', formData.fullName || '');
   formDataObj.append('email', formData.email || '');
@@ -161,7 +162,7 @@ export const getCompanyCompliance = async (params = {}) => {
  */
 export const submitTaxAudit = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields - convert camelCase to snake_case
   formDataObj.append('full_name', formData.fullName || '');
   formDataObj.append('email', formData.email || '');
@@ -210,7 +211,7 @@ export const getTaxAudit = async (params = {}) => {
  */
 export const submitLegalAdvice = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('File') && !key.includes('Document') && !key.includes('Attachment')) {
@@ -252,7 +253,7 @@ export const getLegalAdvice = async (params = {}) => {
  */
 export const submitProvidentFundServices = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('File') && !key.includes('Document') && !key.includes('Proof') && !key.includes('Statement')) {
@@ -294,7 +295,7 @@ export const getProvidentFundServices = async (params = {}) => {
  */
 export const submitTDSServices = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('File') && !key.includes('Certificate') && !key.includes('Statement') && !key.includes('Document')) {
@@ -336,7 +337,7 @@ export const getTDSServices = async (params = {}) => {
  */
 export const submitGSTServices = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('Certificate') && !key.includes('Invoices') && !key.includes('Statements') && !key.includes('Card')) {
@@ -378,7 +379,7 @@ export const getGSTServices = async (params = {}) => {
  */
 export const submitPayrollServices = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('File') && !key.includes('Document') && !key.includes('Template') && !key.includes('Record')) {
@@ -420,7 +421,7 @@ export const getPayrollServices = async (params = {}) => {
  */
 export const submitAccountingBookkeeping = async (formData) => {
   const formDataObj = new FormData();
-  
+
   // Add form fields
   Object.keys(formData).forEach(key => {
     if (!key.includes('Statement') && !key.includes('Invoice') && !key.includes('Record') && !key.includes('Document')) {

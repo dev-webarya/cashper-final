@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TrendingUp, TrendingDown, Users, IndianRupee, Shield, BarChart3, Activity, AlertCircle, ChevronLeft, ChevronRight, Eye, X, CheckCircle, Loader, Clock, CheckSquare, Star, RefreshCw, Wifi, WifiOff, MessageSquare } from 'lucide-react';
+import { API_ENDPOINTS, getWebSocketUrl } from '../../config/api';
 
 const AdminDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
@@ -17,12 +18,8 @@ const AdminDashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
-  const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/admin';
-  const getWebSocketUrl = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    return apiUrl.replace(/^http/, 'ws') + '/api/admin';
-  };
-  const WS_BASE_URL = getWebSocketUrl();
+  const API_BASE_URL = API_ENDPOINTS.admin;
+  const WS_BASE_URL = getWebSocketUrl() + '/api/admin';
 
   const wsRef = useRef(null);
   const connectionAttemptRef = useRef(0);
@@ -687,8 +684,8 @@ const AdminDashboard = () => {
                     key={index}
                     onClick={() => setActivitiesPage(index + 1)}
                     className={`px-2.5 xs:px-3 py-1 xs:py-1.5 text-xs xs:text-sm font-semibold rounded-lg transition-colors ${activitiesPage === index + 1
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     {index + 1}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/mutual-funds';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.investments.mutualFunds;
 
 // ===================== Contact/Inquiry APIs =====================
 

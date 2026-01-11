@@ -1,6 +1,7 @@
 import { apiRequest, getAuthToken } from './api';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/dashboard';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.dashboard;
 
 /**
  * Get all applications submitted by the current user across all categories

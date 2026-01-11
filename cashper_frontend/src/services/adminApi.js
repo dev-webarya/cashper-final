@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api/admin';
+import { API_ENDPOINTS } from '../config/api';
+const API_BASE_URL = API_ENDPOINTS.admin;
 
 // Helper function to check if user is authenticated
 const isAuthenticated = () => {
@@ -29,7 +30,7 @@ const handleApiError = async (response) => {
     window.location.href = '/login?redirect=/admin';
     throw new Error('Session expired. Please login again.');
   }
-  
+
   const errorData = await response.json().catch(() => ({}));
   throw new Error(errorData.detail || errorData.message || `Request failed with status ${response.status}`);
 };
@@ -47,25 +48,25 @@ export const getUsersDetailed = async (params = {}) => {
   if (!isAuthenticated()) {
     throw new Error('Not authenticated. Please login.');
   }
-  
+
   const { page = 1, limit = 10, search = '', status_filter = 'all' } = params;
   const queryParams = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
   });
-  
+
   if (search) queryParams.append('search', search);
   if (status_filter && status_filter !== 'all') queryParams.append('status_filter', status_filter);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/users/detailed?${queryParams}`, {
       headers: getAuthHeaders()
     });
-    
+
     if (!response.ok) {
       await handleApiError(response);
     }
-    
+
     return response.json();
   } catch (error) {
     console.error('getUsersDetailed error:', error);
@@ -139,7 +140,7 @@ export const getAllLoansDetailed = async () => {
   } catch (err) {
     console.warn('Authenticated endpoint failed, trying public endpoint:', err);
   }
-  
+
   // Fallback to public endpoint (no authentication required)
   try {
     const response = await fetch(`${API_BASE_URL}/loans/all/public`);
@@ -318,7 +319,7 @@ const adminApi = {
   unsuspendUser,
   deleteUser,
   toggleUserActive,
-  
+
   // Loans
   getAllLoans,
   getAllLoansDetailed,
@@ -326,29 +327,29 @@ const adminApi = {
   getLoanDetails,
   approveLoan,
   rejectLoan,
-  
+
   // Dashboard
   getDashboardStats,
   getDashboardActivities,
   getPendingApprovals,
-  
+
   // Insurance
   getAllInsurance,
   getInsuranceClaims,
-  
+
   // Investments
   getAllInvestments,
   getSipPlans,
-  
+
   // Reports
   getRevenueReports,
   getLoanReports,
   getUserReports,
-  
+
   // Settings
   getAdminSettings,
   updateAdminSettings,
-  
+
   // Profile
   getAdminProfile,
   updateAdminProfile

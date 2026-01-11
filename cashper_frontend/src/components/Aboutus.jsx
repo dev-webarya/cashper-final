@@ -960,7 +960,7 @@ const Aboutus = () => {
             >
               <div className="w-64 h-96 xs:w-72 xs:h-full sm:w-80 sm:h-full md:w-full md:h-full lg:w-full lg:h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300">
                 <img
-                  src="/team/Rohit_sir.JPG"
+                  src="/team/rohit-gupta.jpg"
                   alt="Rohit Gupta - Founder"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   onError={(e) => {

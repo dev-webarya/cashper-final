@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Filter, Download, Plus, Eye, Edit, Trash2, Phone, Mail, Calendar, AlertCircle, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL as CENTRAL_API_BASE_URL } from '../../config/api';
+const API_BASE_URL = CENTRAL_API_BASE_URL;
 
 const InsuranceManagement = () => {
   const [filterType, setFilterType] = useState('all');
@@ -11,7 +12,7 @@ const InsuranceManagement = () => {
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Data states
   const [policies, setPolicies] = useState([]);
   const [statistics, setStatistics] = useState({
@@ -22,7 +23,7 @@ const InsuranceManagement = () => {
     totalClaims: 0,
     premiumCollected: '₹0',
   });
-  
+
   // Pagination states
   const [policiesCurrentPage, setPoliciesCurrentPage] = useState(1);
   const [totalPolicies, setTotalPolicies] = useState(0);
@@ -114,33 +115,33 @@ const InsuranceManagement = () => {
   const downloadDocument = async (policyId, documentPath) => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       // Encode the document path for URL (handle slashes in path)
       const encodedPath = encodeURIComponent(documentPath);
-      
+
       // Use the proper backend endpoint for document download
       // Endpoint: /admin/insurance-management/documents/download/{policy_id}/{document_path}
       const downloadUrl = `${API_BASE_URL}/admin/insurance-management/documents/download/${policyId}/${encodedPath}`;
-      
+
       console.log('Downloading from:', downloadUrl);
-      
+
       const response = await fetch(downloadUrl, {
         method: 'GET',
         headers: {
           'Authorization': token ? `Bearer ${token}` : ''
         }
       });
-      
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        
+
         // Extract filename from path
         const filename = documentPath.split('\\').pop().split('/').pop();
         a.href = url;
         a.download = filename;
-        
+
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -155,7 +156,7 @@ const InsuranceManagement = () => {
         console.error('Server error:', error);
         alert(`Failed to download document: ${response.statusText}`);
       }
-      
+
     } catch (error) {
       console.error('Error downloading document:', error);
       alert('Failed to download document. Please check console for details.');
@@ -167,13 +168,13 @@ const InsuranceManagement = () => {
       const params = new URLSearchParams();
       if (filterType !== 'all') params.append('type', filterType);
       if (filterStatus !== 'all') params.append('status', filterStatus);
-      
+
       const response = await fetch(`${API_BASE_URL}/admin/insurance-management/policies/export/csv?${params}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         const policies = data.policies;
-        
+
         const headers = ['ID', 'Customer', 'Type', 'Premium', 'Coverage', 'Status', 'Start Date', 'End Date'];
         const csvData = [
           headers.join(','),
@@ -188,7 +189,7 @@ const InsuranceManagement = () => {
             p.endDate
           ].join(','))
         ].join('\n');
-        
+
         const blob = new Blob([csvData], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -354,11 +355,10 @@ const InsuranceManagement = () => {
                 setFilterType(type);
                 setPoliciesCurrentPage(1);
               }}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 capitalize ${
-                filterType === type
+              className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 capitalize ${filterType === type
                   ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               {type}
             </button>
@@ -374,7 +374,7 @@ const InsuranceManagement = () => {
             {loading ? 'Loading...' : `Showing ${policies.length} of ${totalPolicies} policies`}
           </p>
         </div>
-        
+
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-12">
@@ -411,7 +411,7 @@ const InsuranceManagement = () => {
                       {policy.status}
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                     <div>
                       <p className="text-gray-500">Type</p>
@@ -432,14 +432,14 @@ const InsuranceManagement = () => {
                   </div>
 
                   <div className="flex gap-2 pt-3 border-t border-gray-100">
-                    <button 
+                    <button
                       onClick={() => handleViewDetails(policy)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       View
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleStatusUpdate(policy.id || policy.policyId, 'Active')}
                       disabled={policy.status === 'Active'}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -447,7 +447,7 @@ const InsuranceManagement = () => {
                       <CheckCircle className="w-4 h-4" />
                       Approve
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleStatusUpdate(policy.id || policy.policyId, 'Expired')}
                       disabled={policy.status === 'Expired'}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -514,14 +514,14 @@ const InsuranceManagement = () => {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button 
+                        <button
                           onClick={() => handleViewDetails(policy)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStatusUpdate(policy.id || policy.policyId, 'Active')}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Approve"
@@ -529,7 +529,7 @@ const InsuranceManagement = () => {
                         >
                           <CheckCircle className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleStatusUpdate(policy.id || policy.policyId, 'Expired')}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Reject"
@@ -545,7 +545,7 @@ const InsuranceManagement = () => {
             </table>
           </div>
         )}
-        
+
         {/* Pagination Controls for Policies */}
         {!loading && totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200">
@@ -556,15 +556,14 @@ const InsuranceManagement = () => {
               <button
                 onClick={() => setPoliciesCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={policiesCurrentPage === 1}
-                className={`p-2 rounded-lg font-semibold transition-all duration-300 ${
-                  policiesCurrentPage === 1
+                className={`p-2 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === 1
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
-                }`}
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              
+
               <div className="flex items-center gap-1">
                 {[...Array(totalPages)].map((_, index) => {
                   const pageNum = index + 1;
@@ -577,11 +576,10 @@ const InsuranceManagement = () => {
                       <button
                         key={pageNum}
                         onClick={() => setPoliciesCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-semibold transition-all duration-300 ${
-                          policiesCurrentPage === pageNum
+                        className={`w-10 h-10 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === pageNum
                             ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg transform scale-110'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </button>
@@ -595,15 +593,14 @@ const InsuranceManagement = () => {
                   return null;
                 })}
               </div>
-              
+
               <button
                 onClick={() => setPoliciesCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={policiesCurrentPage === totalPages}
-                className={`p-2 rounded-lg font-semibold transition-all duration-300 ${
-                  policiesCurrentPage === totalPages
+                className={`p-2 rounded-lg font-semibold transition-all duration-300 ${policiesCurrentPage === totalPages
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
-                }`}
+                  }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -614,24 +611,24 @@ const InsuranceManagement = () => {
 
       {/* Policy Details Modal */}
       {showDetailsModal && selectedPolicy && (
-        <div 
+        <div
           className="fixed inset-0 bg-transparent z-50 flex items-center justify-center p-4"
           onClick={() => setShowDetailsModal(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto border-2 border-blue-500 w-full max-w-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center rounded-t-xl">
               <h2 className="text-2xl font-bold">Policy Details</h2>
-              <button 
+              <button
                 onClick={() => setShowDetailsModal(false)}
                 className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-4">
               {/* Customer Information */}
               <div>
@@ -719,7 +716,7 @@ const InsuranceManagement = () => {
                                 <span className="text-xs text-gray-500 block">{docPath}</span>
                               </div>
                             </div>
-                            <button 
+                            <button
                               onClick={() => downloadDocument(selectedPolicy.id || selectedPolicy.policyId, docPath)}
                               className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ml-2"
                             >
@@ -741,7 +738,7 @@ const InsuranceManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t">
                 <button
