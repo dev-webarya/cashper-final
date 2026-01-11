@@ -1,23 +1,38 @@
 version: '3.8'
 
+# =============================================================================
+# CASHPER DOCKER COMPOSE CONFIGURATION
+# =============================================================================
+# Environment Variables:
+#   - VITE_API_URL: Empty for same-origin (Docker), or full URL for separate API
+#   - VITE_GOOGLE_CLIENT_ID: Google OAuth client ID
+#   - Backend .env: Place in ./cashper_backend/.env (see DOCKER.md)
+# =============================================================================
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ""
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+        # IMPORTANT: For Docker deployment, VITE_API_URL should be empty
+        # This makes frontend use relative URLs (same origin as backend)
+        # For separate API domain, set to: "https://api.your-domain.com"
+        VITE_API_URL: "${VITE_API_URL:-}"
+        VITE_GOOGLE_CLIENT_ID: "${VITE_GOOGLE_CLIENT_ID:-}"
     container_name: cashper_app
     restart: always
     ports:
-      - "8080:8000"
+      - "8080:8000" # Access app at http://localhost:8080
     env_file:
       - ./cashper_backend/.env
     depends_on:
       - mongo
     volumes:
       - uploads_data:/app/uploads
+    environment:
+      # Runtime environment (not build-time)
+      - NODE_ENV=production
 
   mongo:
     image: mongo:latest

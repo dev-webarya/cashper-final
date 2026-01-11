@@ -1,9 +1,13 @@
 /**
  * Centralized API Configuration
  * ==============================
- * Change VITE_API_URL in .env to switch between local/hosted API
  * 
- * Usage:
+ * CONFIGURATION:
+ * - Docker (same-origin): VITE_API_URL="" (empty) - uses relative URLs
+ * - Local development: VITE_API_URL="http://localhost:8000" or leave unset
+ * - Separate API domain: VITE_API_URL="https://api.your-domain.com"
+ * 
+ * USAGE:
  *   import { API_BASE_URL, getAssetUrl } from '../config/api.config';
  *   
  *   // For API calls:
@@ -13,8 +17,14 @@
  *   src={getAssetUrl(data.profileImage)}
  */
 
+// Check if we're in a Docker/production environment (VITE_API_URL is explicitly set)
+const envApiUrl = import.meta.env.VITE_API_URL;
+
 // Base URL for API server (without /api suffix)
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// - If VITE_API_URL is empty string "", use "" for same-origin (Docker)
+// - If VITE_API_URL is undefined, default to localhost for local dev
+// - If VITE_API_URL has a value, use that value
+export const API_BASE_URL = envApiUrl !== undefined ? envApiUrl : 'http://localhost:8000';
 
 // Full API endpoint (with /api suffix)
 export const API_ENDPOINT = `${API_BASE_URL}/api`;
