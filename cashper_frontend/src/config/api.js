@@ -10,7 +10,7 @@
 export const API_ROOT = import.meta.env.VITE_API_URL || '';
 
 // Specific API endpoints
-export const API_BASE_URL = `${API_ROOT}/api`;
+export const API_BASE_URL = `${API_ROOT}`;
 
 // Service-specific endpoints
 export const API_ENDPOINTS = {
